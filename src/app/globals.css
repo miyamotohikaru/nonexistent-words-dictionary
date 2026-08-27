@@ -1,0 +1,5420 @@
+@import "tailwindcss";
+
+/* ===== Design Tokens ===== */
+:root {
+  --bg: #1f1610;
+  --bgSoft: #241a13;
+  --text: #e8d9bf;
+  --textSoft: #b8a584;
+  --textMute: #9a8568; /* 暗背景でWCAG AA(4.5:1)を満たす明度に引き上げ（旧#7a6953は約3.4:1で不足） */
+  --rule: #46362a;
+  --accent: #b3392a;
+  --accentDim: #8e2a1e;
+  --font-main: "Hiragino Mincho ProN", "YuMincho", "Noto Serif JP", "Shippori Mincho", serif;
+  /* legacy aliases for pages that still reference old vars */
+  --base-bg: var(--bg);
+  --base-card: var(--bgSoft);
+  --base-hover: #2e2818;
+  --base-border: var(--rule);
+  --text-primary: var(--text);
+  --text-body: var(--textSoft);
+  --text-sub: var(--textMute);
+  --text-placeholder: var(--textMute);
+  --accent-garnet: var(--accent);
+  --accent-garnet-hover: var(--accentDim);
+  --accent-olive: var(--textMute);
+  --page-bg: #D9D4C8;
+  --page-text: #242010;
+  --page-text-body: #3a3425;
+  --page-text-sub: #585538;
+  --page-line: rgba(100, 85, 60, 0.1);
+  --font-heading: var(--font-main);
+  --font-body: var(--font-main);
+  --font-english: "Times New Roman", "IM Fell English", serif;
+  --font-ui: "Noto Sans JP", sans-serif;
+}
+
+/* ===== Reset & Base ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* スクリーンリーダ専用（視覚的に隠すが読み上げ・見出しナビには出す） */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main);
+  line-height: 1.8;
+  min-height: 100vh;
+  min-height: 100dvh; /* 携帯でキーボード表示時に下が伸びるのを防ぐ（dvhは可視領域に追従） */
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * { position: relative; z-index: 1; }
+
+a { color: var(--text-body); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--text-primary); }
+
+/* ===== キーボードフォーカスの可視化（WCAG 2.4.7）=====
+   多数の要素で outline:none にしているため、キーボード操作時のフォーカス位置が
+   見えなくなっていた。:focus-visible（キーボード由来のフォーカスのみ）でリングを復活。
+   マウスクリック時には出ないので見た目への影響は最小。 */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :where(a, button) { transition: color 0.2s, outline-color 0.2s; }
+}
+
+/* ===== Header ===== */
+.site-header {
+  border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  background-color: var(--bg);
+  z-index: 100;
+}
+
+.header-inner {
+  margin: 0 auto;
+  padding: 0 56px;
+  height: 64px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-logo-group {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.header-logo {
+  font-family: var(--font-main);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.header-logo-en {
+  font-family: "Times New Roman", serif;
+  font-size: 11px;
+  color: var(--textMute);
+  letter-spacing: 0.35em;
+}
+
+.header-logo-group:hover { color: inherit; }
+.header-logo-group:hover .header-logo { color: var(--text-primary); }
+
+.header-nav {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.header-link {
+  font-size: 14px;
+  color: var(--text);
+  letter-spacing: 0.05em;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  background: transparent;
+}
+
+.header-link:hover { opacity: 0.7; color: var(--text); }
+
+.header-link--bordered {
+  border: 1px solid var(--text);
+  padding: 8px 24px;
+  font-weight: 600;
+  background: var(--text);
+  color: var(--bg);
+}
+
+.header-link--bordered:hover {
+  opacity: 0.85;
+  color: var(--bg);
+}
+
+.header-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--rule);
+  flex-shrink: 0;
+}
+
+/* Language Switcher */
+.lang-switcher {
+  position: relative;
+}
+
+.lang-switcher-btn {
+  font-size: 14px;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.lang-switcher-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-sub);
+}
+
+.lang-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background: var(--base-bg);
+  border: 1px solid var(--base-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 300;
+  min-width: 100px;
+}
+
+.lang-menu-item {
+  display: block;
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  background: transparent;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s, color 0.2s;
+}
+
+.lang-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.lang-menu-item.active {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ===== Page Wrapper ===== */
+.page-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  min-height: calc(100vh - 120px);
+}
+
+.main-content {
+  padding: 0;
+}
+
+/* ===== Hero ===== */
+.hero {
+  text-align: center;
+  padding: 2rem 0 1.5rem;
+  transition: padding 0.4s ease;
+}
+
+.hero-centered {
+  display: none; /* Hero integrated into search section */
+}
+
+.hero-copy { margin-bottom: 2rem; }
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 2;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  line-height: 2;
+}
+
+/* ===== Search Bar (old style) ===== */
+.search-bar {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+  border: 1px solid var(--base-border);
+  overflow: hidden;
+  background-color: var(--base-bg);
+  transition: border-color 0.3s;
+  position: relative;
+  z-index: 1;
+}
+
+.search-bar:focus-within { border-color: var(--text-sub); }
+
+.search-input {
+  flex: 1;
+  padding: 0.875rem 1.25rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  letter-spacing: 0.05em;
+}
+
+.search-input::placeholder {
+  color: var(--text-placeholder);
+  font-size: 0.9375rem;
+  letter-spacing: 0.03em;
+}
+
+.search-input:disabled { opacity: 0.5; }
+
+.search-button {
+  padding: 0.875rem 2rem;
+  background-color: var(--accent-garnet);
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  line-height: 1;
+}
+
+.search-button:hover:not(:disabled) { background-color: var(--accent-garnet-hover); }
+.search-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.search-note {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--text-sub);
+  margin-top: 0.5rem;
+  text-align: right;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== Paper Card (結果カード) ===== */
+.paper-card {
+  max-width: 640px;
+  margin: 2rem auto 0;
+  background-color: var(--page-bg);
+  border-radius: 2px;
+  box-shadow: 2px 4px 16px rgba(0,0,0,0.3);
+  position: relative;
+  padding-bottom: 2.5rem;
+  z-index: 1;
+}
+
+.paper-lines {
+  padding: 1rem 1.5rem 0;
+}
+
+.paper-line {
+  height: 1px;
+  background-color: var(--page-line);
+  margin-bottom: 0.5rem;
+}
+
+.paper-body {
+  padding: 1.5rem 2rem;
+  color: var(--page-text);
+}
+
+.paper-page-number {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1.25rem;
+  font-family: var(--font-english);
+  font-size: 0.6875rem;
+  color: var(--page-text-sub);
+  opacity: 0.5;
+}
+
+/* --- 拒否表示 --- */
+.paper-rejection {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.paper-rejection-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--page-text-body);
+  line-height: 2;
+}
+
+.paper-retry-btn {
+  margin-top: 2rem;
+  padding: 0.5rem 1.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  background: transparent;
+  border: 1px solid var(--page-text-sub);
+  color: var(--page-text-body);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.paper-retry-btn:hover {
+  border-color: var(--page-text);
+  color: var(--page-text);
+}
+
+/* --- 結果表示 --- */
+.paper-word-header {
+  border-left: 3px solid var(--accent-garnet);
+  padding-left: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.paper-word-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--page-text);
+}
+
+.paper-pos-badge {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--accent-garnet);
+  border: 1px solid var(--accent-garnet);
+  padding: 0.125rem 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 2px;
+}
+
+.paper-definition {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--page-text-body);
+  line-height: 2;
+  margin-bottom: 1.5rem;
+}
+
+.paper-example-section {
+  margin-bottom: 1.5rem;
+}
+
+.paper-example-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--page-text-sub);
+  margin-bottom: 0.25rem;
+}
+
+.paper-example-text {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--page-text-body);
+  line-height: 1.8;
+  border-left: 2px solid var(--page-line);
+  padding-left: 0.75rem;
+}
+
+.paper-edit-toggle {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.paper-edit-btn {
+  padding: 0.375rem 1.25rem;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  background: transparent;
+  border: 1px solid var(--page-text-sub);
+  color: var(--page-text-body);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.paper-edit-btn:hover {
+  border-color: var(--page-text);
+  color: var(--page-text);
+}
+
+.paper-edit-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--page-text);
+  background-color: rgba(255,255,255,0.5);
+  border: 1px solid var(--page-line);
+  border-radius: 2px;
+  outline: none;
+  resize: vertical;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.paper-edit-textarea:focus { border-color: var(--accent-garnet); }
+
+/* --- 掲載フォーム --- */
+.paper-register {
+  border-top: 1px solid var(--page-line);
+  padding-top: 1.5rem;
+}
+
+.paper-register-heading {
+  font-family: var(--font-heading);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--page-text);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.paper-register-field {
+  margin-bottom: 1rem;
+}
+
+.paper-register-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--page-text);
+  margin-bottom: 0.25rem;
+}
+
+.paper-register-input {
+  width: 100%;
+  padding: 0.5rem 0;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--page-text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--page-line);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.paper-register-input:focus { border-bottom-color: var(--accent-garnet); }
+
+.paper-register-input::placeholder {
+  color: var(--page-text-sub);
+  font-size: 0.875rem;
+}
+
+.paper-register-btn {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.875rem;
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--accent-garnet);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.paper-register-btn:hover:not(:disabled) { background-color: var(--accent-garnet-hover); }
+.paper-register-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.paper-register-error {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--accent-garnet);
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+/* ===== Lookup Form ===== */
+.lookup-container { max-width: 560px; margin: 0 auto; }
+.lookup-form { width: 100%; }
+
+.lookup-input-wrapper {
+  display: flex;
+  border: 1px solid var(--base-border);
+  overflow: hidden;
+  background-color: var(--base-bg);
+  transition: border-color 0.3s;
+}
+
+.lookup-input-wrapper:focus-within { border-color: var(--text-sub); }
+
+.lookup-input {
+  flex: 1;
+  padding: 0.875rem 1.25rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  letter-spacing: 0.05em;
+}
+
+.lookup-input::placeholder {
+  color: var(--text-placeholder);
+  font-size: 0.9375rem;
+  letter-spacing: 0.03em;
+}
+
+.lookup-button {
+  padding: 0.875rem 2rem;
+  background-color: var(--accent-garnet);
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.lookup-button:hover:not(:disabled) { background-color: var(--accent-garnet-hover); }
+.lookup-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.lookup-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(217, 212, 200, 0.3);
+  border-top-color: var(--text-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.lookup-hint {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--text-sub);
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
+/* ===== Page Flip Loading Animation ===== */
+.page-flip-loading {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 68px - 100px);
+}
+
+.page-flip-book {
+  position: relative;
+  width: 240px;
+  height: 180px;
+  perspective: 1200px;
+  margin-bottom: 1.5rem;
+}
+
+.page-flip-cover-back {
+  position: absolute;
+  width: 115px; height: 160px;
+  right: 4px; top: 10px;
+  background: linear-gradient(135deg, #3a3425, #2a2518);
+  border-radius: 0 3px 3px 0;
+  border: 1px solid #4a4538;
+  border-left: none;
+  box-shadow: inset 4px 0 8px rgba(0,0,0,0.2);
+}
+
+.page-flip-cover-front {
+  position: absolute;
+  width: 115px; height: 160px;
+  left: 4px; top: 10px;
+  background: linear-gradient(135deg, #4a3828, #3a2818);
+  border-radius: 4px 0 0 4px;
+  border: 1px solid #5a4838;
+  border-right: none;
+  z-index: 1;
+  box-shadow: -2px 2px 8px rgba(0,0,0,0.3);
+}
+
+.page-flip-page {
+  position: absolute;
+  width: 108px; height: 150px;
+  left: 11px; top: 15px;
+  background: linear-gradient(270deg, #f0e8d8, #e8dcc8);
+  border-radius: 3px 0 0 3px;
+  transform-origin: right center;
+  z-index: 5;
+  box-shadow: 1px 0 3px rgba(0,0,0,0.1);
+}
+
+.page-flip-page::after {
+  content: "";
+  position: absolute;
+  top: 15%; left: 12%; right: 12%; bottom: 15%;
+  background: repeating-linear-gradient(180deg, transparent, transparent 10px, rgba(180,170,150,0.2) 10px, rgba(180,170,150,0.2) 11px);
+}
+
+/* 最初は速く、最後はゆっくりめくれる（減速感） */
+.page-flip-page-1  { animation: flipPageBig 4s ease-in-out infinite; animation-delay: 0s; }
+.page-flip-page-2  { animation: flipPageBig 4s ease-in-out infinite; animation-delay: 0.15s; }
+.page-flip-page-3  { animation: flipPageBig 4s ease-in-out infinite; animation-delay: 0.3s; }
+.page-flip-page-4  { animation: flipPageBig 4s ease-in-out infinite; animation-delay: 0.45s; }
+.page-flip-page-5  { animation: flipPageBig 4s ease-in-out infinite; animation-delay: 0.6s; }
+.page-flip-page-6  { animation: flipPageBig 4s ease-in-out infinite; animation-delay: 0.8s; }
+.page-flip-page-7  { animation: flipPageBig 4s ease-in-out infinite; animation-delay: 1.0s; }
+.page-flip-page-8  { animation: flipPageBig 4s ease-in-out infinite; animation-delay: 1.25s; }
+.page-flip-page-9  { animation: flipPageBig 4s ease-in-out infinite; animation-delay: 1.55s; }
+.page-flip-page-10 { animation: flipPageSlow 4s ease-in-out infinite; animation-delay: 1.9s; }
+.page-flip-page-11 { animation: flipPageSlow 4s ease-in-out infinite; animation-delay: 2.3s; }
+.page-flip-page-12 { animation: flipPageSlow 4s ease-in-out infinite; animation-delay: 2.8s; }
+
+@keyframes flipPageBig {
+  0% { transform: rotateY(0deg); box-shadow: 1px 0 3px rgba(0,0,0,0.1); }
+  8% { transform: rotateY(60deg); box-shadow: 4px 0 12px rgba(0,0,0,0.15); }
+  16% { transform: rotateY(170deg); box-shadow: -2px 0 8px rgba(0,0,0,0.1); }
+  22%, 100% { transform: rotateY(170deg); opacity: 0; }
+}
+
+/* 最後のページ用：ゆっくり優雅にめくれる */
+@keyframes flipPageSlow {
+  0% { transform: rotateY(0deg); box-shadow: 1px 0 3px rgba(0,0,0,0.1); }
+  12% { transform: rotateY(30deg); box-shadow: 3px 0 10px rgba(0,0,0,0.12); }
+  25% { transform: rotateY(90deg); box-shadow: 4px 0 12px rgba(0,0,0,0.15); }
+  38% { transform: rotateY(150deg); box-shadow: -2px 0 8px rgba(0,0,0,0.1); }
+  45%, 100% { transform: rotateY(170deg); opacity: 0; }
+}
+
+.page-flip-text {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--text-sub);
+  letter-spacing: 0.15em;
+  animation: textPulse 3s ease-in-out infinite;
+}
+
+@keyframes textPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* ===== Dictionary Page (Page-Turn Animation) ===== */
+.dict-page {
+  margin-top: 2rem;
+  perspective: 1200px;
+}
+
+.dict-page__paper {
+  position: relative;
+  background-color: var(--page-bg);
+  min-height: 200px;
+  padding: 1.5rem 2rem 2rem;
+  transform-origin: left center;
+  border-radius: 1px 3px 3px 1px;
+  box-shadow: 2px 2px 12px rgba(0,0,0,0.15);
+}
+
+/* Binding shadow */
+.dict-page__binding {
+  position: absolute;
+  top: 0; left: 0;
+  width: 12px; height: 100%;
+  background: linear-gradient(to right, rgba(0,0,0,0.06), transparent);
+  pointer-events: none;
+  border-radius: 1px 0 0 1px;
+}
+
+/* Ruled lines */
+.dict-page__lines {
+  position: absolute;
+  top: 1.5rem; left: 2rem; right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.dict-page__line {
+  height: 1px;
+  background: var(--page-line);
+}
+
+/* Page number */
+.dict-page__number {
+  position: absolute;
+  bottom: 8px; right: 12px;
+  font-size: 0.625rem;
+  color: rgba(100, 85, 60, 0.25);
+  font-family: var(--font-english);
+}
+
+/* Content */
+.dict-page__content { position: relative; z-index: 1; }
+
+/* Opening animation */
+.dict-page--opening .dict-page__paper {
+  animation: pageOpen 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dict-page__content--revealing {
+  opacity: 0;
+  animation: inkReveal 0.4s ease-out 0.6s forwards;
+}
+
+/* Closing animation */
+.dict-page--closing .dict-page__paper {
+  animation: pageClose 0.3s ease-in forwards;
+}
+
+@keyframes pageOpen {
+  0% { transform: perspective(1200px) rotateY(-90deg); opacity: 0; }
+  60% { transform: perspective(1200px) rotateY(5deg); opacity: 1; }
+  80% { transform: perspective(1200px) rotateY(-2deg); }
+  100% { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
+}
+
+@keyframes pageClose {
+  0% { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
+  100% { transform: perspective(1200px) rotateY(-90deg); opacity: 0; }
+}
+
+@keyframes inkReveal {
+  0% { opacity: 0; filter: blur(1px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+
+/* Ink delay classes for staggered reveal */
+.ink-delay-1 { opacity: 0; animation: inkReveal 0.4s ease-out 0.6s forwards; }
+.ink-delay-2 { opacity: 0; animation: inkReveal 0.4s ease-out 0.68s forwards; }
+.ink-delay-3 { opacity: 0; animation: inkReveal 0.4s ease-out 0.76s forwards; }
+.ink-delay-4 { opacity: 0; animation: inkReveal 0.4s ease-out 0.84s forwards; }
+
+.dict-page--open .ink-delay-1,
+.dict-page--open .ink-delay-2,
+.dict-page--open .ink-delay-3,
+.dict-page--open .ink-delay-4 { opacity: 1; animation: none; filter: none; }
+
+/* ===== Page Content Styles (on paper) ===== */
+.page-word-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--page-text);
+  border-left: 2px solid var(--accent-garnet);
+  padding-left: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-word-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.page-word-reading {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--page-text-sub);
+}
+
+.page-word-pos {
+  font-size: 0.6875rem;
+  color: var(--page-text-sub);
+  background: rgba(88, 85, 56, 0.1);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.page-word-definition {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--page-text-body);
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.page-section-label {
+  font-size: 0.6875rem;
+  color: var(--page-text-sub);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.25rem;
+}
+
+.page-etymology {
+  font-size: 0.8125rem;
+  color: var(--page-text-sub);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.page-example {
+  font-size: 0.8125rem;
+  color: #4a4530;
+  border-left: 1px solid rgba(100, 85, 60, 0.25);
+  padding-left: 0.75rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+
+.page-divider {
+  height: 1px;
+  background: rgba(100, 85, 60, 0.12);
+  margin: 1rem 0;
+}
+
+/* Rejection on page */
+.page-rejection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  text-align: center;
+}
+
+.page-rejection-text {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--page-text-sub);
+  line-height: 1.8;
+}
+
+/* Save form on page */
+.page-save { margin-top: 1rem; }
+
+.page-save-prompt {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--page-text-sub);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.page-save-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.page-save-field { display: flex; flex-direction: column; gap: 0.25rem; }
+
+.page-save-label {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--page-text-sub);
+  letter-spacing: 0.1em;
+}
+
+.page-save-input {
+  border: none;
+  border-bottom: 1px solid rgba(100, 85, 60, 0.25);
+  background: transparent;
+  padding: 0.5rem 0;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--page-text-body);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.page-save-input:focus { border-bottom-color: var(--page-text-body); }
+.page-save-input::placeholder { color: rgba(100, 85, 60, 0.35); }
+
+.page-save-button {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: var(--accent-garnet);
+  border: none;
+  color: var(--page-bg);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.page-save-button:hover:not(:disabled) { background-color: var(--accent-garnet-hover); }
+.page-save-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.page-save-error {
+  text-align: center;
+  padding: 0.5rem;
+  color: var(--accent-garnet);
+  font-size: 0.8125rem;
+  margin-top: 0.5rem;
+}
+
+.page-save-error a { color: var(--accent-garnet); text-decoration: underline; }
+
+.page-save-success {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.page-save-success-text {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  color: var(--page-text-sub);
+  letter-spacing: 0.05em;
+}
+
+.page-save-success-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--accent-garnet);
+}
+
+/* ===== Sections ===== */
+.section {
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--base-border);
+}
+
+.section-label-text {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
+}
+
+.section-footer-text {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  margin-top: 1.5rem;
+}
+
+/* Today's word */
+.today-word {
+  display: block;
+  padding: 1rem 0;
+  transition: background-color 0.2s;
+}
+
+.today-word:hover { color: inherit; }
+
+.today-word-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.today-word-def {
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  display: block;
+}
+
+/* Recent words list */
+.recent-words-list { display: flex; flex-direction: column; }
+
+.recent-word-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #1e1a15;
+  transition: background-color 0.2s;
+}
+
+.recent-word-row:hover { background-color: var(--base-hover); color: inherit; }
+.recent-word-row:last-child { border-bottom: none; }
+
+.recent-word-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 5rem;
+  flex-shrink: 0;
+}
+
+.recent-word-reading {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  flex-shrink: 0;
+}
+
+.recent-word-def {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* ===== Word Card (dark theme - for detail page) ===== */
+.word-card {
+  padding: 0;
+  border-left: 2px solid var(--accent-garnet);
+  padding-left: 1.5rem;
+}
+
+.word-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.word-title {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.word-link { color: var(--text-primary); }
+.word-link:hover { color: var(--text-body); }
+
+.word-reading {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--text-sub);
+}
+
+.word-pos {
+  font-size: 0.6875rem;
+  color: var(--text-sub);
+  background-color: var(--base-card);
+  padding: 0.125rem 0.5rem;
+  border-radius: 2px;
+}
+
+.word-body { font-family: var(--font-body); }
+
+.word-section { margin-bottom: 1.5rem; }
+.word-section:last-child { margin-bottom: 0; }
+
+.section-label {
+  font-size: 0.6875rem;
+  color: var(--text-sub);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.word-definition {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+  color: var(--text-body);
+}
+
+.word-etymology {
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: #9a8e78;
+}
+
+.word-examples { list-style: none; }
+
+.word-example {
+  font-size: 0.84375rem;
+  line-height: 1.7;
+  color: var(--text-body);
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--base-border);
+  margin-bottom: 0.75rem;
+}
+
+.word-example:last-child { margin-bottom: 0; }
+
+.word-meta {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--base-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.word-meta-nickname, .word-meta-date {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+/* ===== Word Card Compact ===== */
+.word-card-compact {
+  position: relative;
+  border-bottom: 1px solid var(--base-border);
+  transition: background-color 0.2s;
+}
+
+.word-card-compact:hover { background-color: var(--base-hover); }
+
+.word-card-compact-link {
+  display: block;
+  padding: 1rem 1.25rem;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--accent-garnet);
+  color: inherit;
+}
+
+.word-card-compact-link:hover { color: inherit; }
+
+.word-card-compact-header { margin-bottom: 0.3rem; }
+
+.word-card-compact-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.word-card-compact-like {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+}
+
+.word-card-nickname { font-size: 0.75rem; color: var(--text-sub); }
+
+.word-list-word {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.word-list-def {
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  margin-top: 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.word-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Word Detail ===== */
+.word-detail-header { padding: 1rem 0 0; }
+
+.word-detail-content {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ===== Word Detail Paper (continuous vertical flow) ===== */
+.word-detail-paper-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1rem 2rem;
+  -webkit-overflow-scrolling: touch;
+}
+.word-detail-paper {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  height: calc(100vh - 12rem);
+  height: calc(100dvh - 12rem); /* iOS Safariのツールバー表示時に末尾列が隠れるのを防ぐ（dvhは可視領域に追従） */
+  width: max-content;
+  max-width: none;
+  display: block;
+  padding: 2.5rem 3rem;
+  box-sizing: border-box;
+  background: var(--page-bg);
+  box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.15);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.95;
+  letter-spacing: 0.03em;
+  color: #2e2818;
+  text-align: start;
+}
+/* 見出し語グループ: 紙面の高さいっぱいの独立した1列を占有 → 定義は必ず次の列へ */
+.wdp-head-group {
+  display: inline-block;
+  height: 100%;
+  vertical-align: top;
+  margin-left: 1.375rem;
+}
+/* シェア画面の紙面: 全画面化せず控えめな高さに（複数列折り返しは維持）
+   詳細度を上げてモバイル用 .word-detail-paper の高さ指定にも勝たせる */
+.word-detail-paper.word-detail-paper--share {
+  height: clamp(280px, 50vh, 440px);
+}
+.wdp-headword {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1610;
+  border-right: 2px solid var(--accent-garnet);
+  padding-right: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.wdp-reading {
+  font-size: 0.8125rem;
+  color: #585538;
+  margin-bottom: 0.25rem;
+}
+.wdp-pos {
+  font-size: 0.6875rem;
+  color: #585538;
+  margin-bottom: 1.25rem;
+}
+/* 定義: インラインのまま（height指定なし）→ 複数列に自然に折り返す */
+.wdp-definition {
+  margin-bottom: 1.5rem;
+}
+/* 語源: 独立した1列 */
+.wdp-etymology {
+  display: inline-block;
+  height: 100%;
+  vertical-align: top;
+  font-size: 0.8125rem;
+  color: #585538;
+  margin-right: 1rem;
+}
+/* 例文: 独立した1列 */
+.wdp-example {
+  display: inline-block;
+  height: 100%;
+  vertical-align: top;
+  font-size: 0.8125rem;
+  color: #4a4530;
+  margin-right: 1.125rem;
+}
+/* 掲載者名: 独立した1列（最左・控えめ） */
+.wdp-author {
+  display: inline-block;
+  height: 100%;
+  vertical-align: top;
+  font-size: 0.75rem;
+  color: #7a7460;
+  margin-right: 1rem;
+}
+
+/* ===== Word Actions ===== */
+.word-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+}
+
+/* ===== Like Button ===== */
+.like-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  background: transparent;
+  border: none;
+  padding: 0.4rem 0.6rem;
+  color: var(--text-sub);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.like-button:hover:not(:disabled) { color: #e0245e; }
+.like-button.liked { color: #e0245e; }
+.like-button:disabled { cursor: default; }
+
+.like-heart {
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+
+.like-button:hover:not(:disabled) .like-heart { transform: scale(1.2); }
+.like-pop .like-heart { animation: like-pop-anim 0.4s ease; }
+
+@keyframes like-pop-anim {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.4); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.like-count { font-size: 0.8rem; min-height: 1.1em; line-height: 1; }
+
+/* ===== Share Buttons ===== */
+.share-buttons { display: flex; gap: 0.75rem; }
+
+.share-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--base-border);
+  border-radius: 2px;
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+
+.share-button:hover {
+  border-color: var(--text-sub);
+  color: var(--text-primary);
+}
+
+/* ===== Report ===== */
+.report-section { margin-top: 2rem; text-align: center; }
+.report-container { text-align: center; }
+
+.report-link {
+  background: transparent;
+  border: none;
+  color: var(--text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.report-link:hover { color: var(--text-body); }
+
+.report-form { max-width: 400px; margin: 0 auto; }
+
+.report-textarea {
+  width: 100%;
+  padding: 0.6rem;
+  background-color: var(--base-card);
+  border: 1px solid var(--base-border);
+  border-radius: 2px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  resize: vertical;
+  outline: none;
+  margin-bottom: 0.5rem;
+}
+
+.report-textarea:focus { border-color: var(--text-sub); }
+
+.report-actions { display: flex; gap: 0.5rem; justify-content: center; }
+
+.report-submit, .report-cancel {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--base-border);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.report-submit:hover { border-color: var(--text-sub); color: var(--text-primary); }
+.report-cancel:hover { color: var(--text-primary); }
+.report-done { font-size: 0.8rem; color: var(--text-sub); }
+
+/* ===== Browse Page (Gojuon) ===== */
+.gojuon-header { padding: 2rem 0 1rem; }
+
+.page-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  margin-bottom: 1.5rem;
+}
+
+.back-link:hover { color: var(--text-primary); }
+
+.gojuon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.gojuon-cell {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  border: 1px solid var(--base-border);
+  background: transparent;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gojuon-cell:hover {
+  background-color: var(--base-hover);
+  color: var(--text-primary);
+}
+
+.gojuon-cell.has-words {
+  color: var(--text-primary);
+  border-color: var(--accent-olive);
+}
+
+.gojuon-cell.active {
+  background-color: var(--text-primary);
+  color: var(--base-bg);
+  border-color: var(--text-primary);
+}
+
+.gojuon-cell.empty {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.browse-word-list { display: flex; flex-direction: column; }
+
+.browse-word-item {
+  display: block;
+  padding: 0.75rem 0 0.75rem 1.25rem;
+  border-left: 2px solid var(--accent-garnet);
+  border-bottom: 1px solid var(--base-border);
+  transition: background-color 0.2s;
+  color: inherit;
+}
+
+.browse-word-item:hover { background-color: var(--base-hover); color: inherit; }
+.browse-word-item:last-child { border-bottom: none; }
+
+.browse-word-name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-right: 0.5rem;
+}
+
+.browse-word-reading {
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  margin-right: 0.5rem;
+}
+
+.browse-word-def {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  margin-top: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kana-section {
+  margin-bottom: 2.5rem;
+  scroll-margin-top: 1rem;
+}
+
+.kana-heading {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--base-border);
+}
+
+.loading-text, .empty-text {
+  color: var(--text-sub);
+  font-size: 0.875rem;
+  padding: 2rem 0;
+  line-height: 1.8;
+}
+
+/* ===== 単語詳細(/word/[id])遷移時のローディング ===== */
+.word-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 50vh;
+  padding: 3rem 0;
+}
+.word-loading-spinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--rule);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.word-loading-text {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  color: var(--text-sub);
+}
+
+/* ===== Ranking Page ===== */
+.ranking-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--base-border);
+}
+
+.ranking-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.75rem 1.5rem;
+  color: var(--text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.ranking-tab:hover { color: var(--text-primary); }
+
+.ranking-tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--text-primary);
+}
+
+.ranking-list { display: flex; flex-direction: column; }
+
+.ranking-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--base-border);
+  align-items: flex-start;
+  color: inherit;
+  transition: background-color 0.2s;
+}
+
+.ranking-item:hover { background-color: var(--base-hover); color: inherit; }
+.ranking-item:last-child { border-bottom: none; }
+
+.ranking-rank {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text-sub);
+  min-width: 2.5rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.ranking-content { flex: 1; min-width: 0; }
+
+.ranking-word {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.ranking-def {
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ranking-meta {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.ranking-likes {
+  font-size: 0.75rem;
+  color: var(--accent-garnet);
+}
+
+.ranking-nickname {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+/* ===== Bookshelf (本棚ランキング) ===== */
+.bookshelf {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.bookshelf-row {
+  position: relative;
+}
+
+.bookshelf-books {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 1rem;
+  min-height: 200px;
+}
+
+.bookshelf-board {
+  height: 12px;
+  background: linear-gradient(180deg, #4a3828, #3a2818);
+  border-radius: 0 0 2px 2px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 2px 2px rgba(255,255,255,0.05);
+  position: relative;
+}
+
+.bookshelf-board::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+}
+
+.book-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 180px;
+  padding: 12px 4px;
+  border-radius: 2px 3px 3px 2px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  box-shadow:
+    inset -2px 0 4px rgba(0,0,0,0.2),
+    inset 2px 0 4px rgba(255,255,255,0.05),
+    2px 0 4px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.book-spine::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+}
+
+.book-spine::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: rgba(0,0,0,0.2);
+}
+
+.book-spine:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow:
+    inset -2px 0 4px rgba(0,0,0,0.2),
+    inset 2px 0 4px rgba(255,255,255,0.05),
+    2px 4px 12px rgba(0,0,0,0.4);
+  color: inherit;
+}
+
+.book-spine-rank {
+  font-family: var(--font-english);
+  font-size: 0.625rem;
+  opacity: 0.6;
+  letter-spacing: 0.05em;
+}
+
+.book-spine-title {
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 0.05em;
+  flex: 0 1 auto;
+  margin-top: 6px;
+  /* flexだと縦書きで短い列が中央寄りになるため block にし、各列を上詰めにする。
+     横方向の中央寄せは親(.book-spine align-items:center)に任せる */
+  display: block;
+  text-align: start;
+  line-height: 1.25;
+  /* 改行(\n)で列を分け、各列内は自動折返ししない（長語はJS側で自然な位置に\nを挿入） */
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow: hidden;
+}
+
+.book-spine-author {
+  font-family: var(--font-ui);
+  font-size: 0.5rem;
+  opacity: 0.5;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: nowrap; /* 名前を折り返さず1列で表示（長い名前はJS側でフォント縮小） */
+  overflow: hidden;
+}
+
+.book-spine-likes {
+  font-family: var(--font-ui);
+  font-size: 0.5625rem;
+  opacity: 0.7;
+  margin-top: auto; /* タイトルを上揃えにし、いいね数は下端へ */
+  padding-top: 4px;
+}
+
+@media (max-width: 480px) {
+  .bookshelf-books { padding: 0 0.5rem; gap: 3px; min-height: 160px; }
+  .book-spine { height: 150px; padding: 8px 3px; }
+  .book-spine-title { font-size: 0.75rem; }
+}
+
+/* ===== Static Pages ===== */
+.static-content { max-width: 640px; }
+
+.static-section { margin-bottom: 3rem; }
+
+.static-section h2 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+}
+
+.static-section p {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--text-body);
+  line-height: 1.9;
+  margin-bottom: 0.75rem;
+}
+
+.static-list {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--text-body);
+  line-height: 1.9;
+  padding-left: 1.5rem;
+}
+
+.static-list li { margin-bottom: 0.5rem; }
+.static-date { font-size: 0.8rem; color: var(--text-sub); margin-top: 1rem; }
+
+/* ===== Not Found ===== */
+.not-found { text-align: center; padding: 5rem 0; }
+.not-found h1 { font-family: var(--font-heading); font-size: 1.25rem; color: var(--text-primary); margin-bottom: 1rem; }
+.not-found p { color: var(--text-sub); margin-bottom: 2rem; }
+
+/* ===== Error Message ===== */
+.error-message {
+  text-align: center;
+  padding: 1rem;
+  color: var(--accent-garnet);
+  border: 1px solid rgba(121, 46, 41, 0.3);
+  background-color: rgba(121, 46, 41, 0.08);
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
+
+.error-link { color: var(--text-body); }
+
+/* ===== Footer ===== */
+/* ===== EmptyWordNotice (蔵書印スタイル通知) ===== */
+.empty-word-notice {
+  writing-mode: vertical-rl;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.375rem;
+  padding: 0.875rem 0.625rem;
+  min-width: 3.75rem;
+  min-height: 23.75rem;
+  border: 2px solid #792E29;
+  border-radius: 2px;
+  background: linear-gradient(135deg, rgba(121, 46, 41, 0.18), rgba(121, 46, 41, 0.06));
+  box-shadow: 0 0 0 1px rgba(121, 46, 41, 0.2), 2px 2px 12px rgba(121, 46, 41, 0.15);
+  align-self: flex-start;
+  flex-shrink: 0;
+  animation: stampDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.empty-word-notice > * {
+  height: auto;
+  align-self: flex-start;
+}
+.notice-line-1,
+.notice-line-2 {
+  font-family: "Shippori Mincho B1", serif;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #c94842;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 8px rgba(201, 72, 66, 0.35);
+}
+.notice-divider {
+  color: #c94842;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  opacity: 0.8;
+}
+.notice-line-3 {
+  font-family: "Shippori Mincho B1", serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #D9D4C8;
+  letter-spacing: 0.08em;
+}
+@keyframes stampDown {
+  0% { opacity: 0; transform: scale(1.3) rotate(-3deg); filter: blur(2px); }
+  60% { opacity: 1; transform: scale(0.95) rotate(1deg); filter: blur(0); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0); }
+}
+
+.footer-mobile-hidden { display: none; }
+
+/* ===== Footer ===== */
+.site-footer {
+  border-top: 1px solid var(--rule);
+  padding: 32px 56px;
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-title {
+  font-size: 13px;
+  color: var(--textSoft);
+  letter-spacing: 0.1em;
+}
+
+.footer-en {
+  font-family: "Times New Roman", serif;
+  letter-spacing: 0.2em;
+}
+
+.footer-sub {
+  font-size: 11px;
+  color: var(--textMute);
+}
+
+.footer-nav { display: flex; justify-content: center; gap: 32px; }
+.footer-nav a { font-size: 12px; color: var(--textSoft); letter-spacing: 0.12em; }
+.footer-nav a:hover { color: var(--text); }
+
+/* ===== Bottom Nav ===== */
+.bottom-nav { text-align: center; padding: 3rem 0; }
+.nav-link { font-size: 0.875rem; color: var(--text-sub); letter-spacing: 0.05em; }
+.nav-link:hover { color: var(--text-primary); }
+
+/* ===== Ad Container ===== */
+.ad-container { margin: 2rem 0; padding: 1rem 0; min-height: 50px; }
+
+/* ===== Edit Button & Form on Lookup Page ===== */
+.page-edit-btn {
+  display: block;
+  margin: 0.75rem auto 0;
+  padding: 0.4rem 1.25rem;
+  background: transparent;
+  border: 1px solid rgba(100, 85, 60, 0.3);
+  color: var(--page-text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.page-edit-btn:hover {
+  border-color: var(--page-text-body);
+  color: var(--page-text-body);
+}
+
+.page-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.page-edit-textarea {
+  border: none;
+  border-bottom: 1px solid rgba(100, 85, 60, 0.25);
+  background: transparent;
+  padding: 0.5rem 0;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--page-text-body);
+  outline: none;
+  resize: vertical;
+  line-height: 1.7;
+  transition: border-color 0.2s;
+}
+
+.page-edit-textarea:focus { border-bottom-color: var(--page-text-body); }
+.page-edit-textarea::placeholder { color: rgba(100, 85, 60, 0.35); }
+
+.page-edit-example-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.page-edit-example-row .page-save-input { flex: 1; }
+
+.page-edit-remove-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(100, 85, 60, 0.25);
+  background: transparent;
+  color: var(--page-text-sub);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.page-edit-remove-btn:hover {
+  border-color: var(--accent-garnet);
+  color: var(--accent-garnet);
+}
+
+.page-edit-add-btn {
+  padding: 0.35rem 0;
+  background: transparent;
+  border: none;
+  color: var(--page-text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s;
+}
+
+.page-edit-add-btn:hover { color: var(--page-text-body); }
+
+.page-edit-done-btn {
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid rgba(100, 85, 60, 0.3);
+  color: var(--page-text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.page-edit-done-btn:hover {
+  border-color: var(--page-text-body);
+  color: var(--page-text-body);
+}
+
+/* ===== Bookshelf ===== */
+.bookshelf-container {
+  margin: 1.5rem 0;
+}
+
+.bookshelf {
+  position: relative;
+}
+
+.bookshelf-books {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 0 1rem;
+  flex-wrap: wrap;
+}
+
+.book-spine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px 2px 0 0;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: inset -1px 0 2px rgba(0, 0, 0, 0.3), inset 1px 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.book-spine:hover {
+  transform: translateY(-8px);
+  box-shadow: inset -1px 0 2px rgba(0, 0, 0, 0.3), inset 1px 0 1px rgba(255, 255, 255, 0.05), 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.book-spine.spine-pulling {
+  transform: translateY(-20px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+}
+
+.book-spine.spine-selected {
+  transform: translateY(-6px);
+  opacity: 0.6;
+}
+
+.spine-title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  letter-spacing: 0.15em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: calc(100% - 16px);
+  padding: 8px 0;
+}
+
+.bookshelf-surface {
+  height: 12px;
+  background: linear-gradient(180deg, #3a2a1a 0%, #2a1c10 50%, #1a1008 100%);
+  border-radius: 0 0 2px 2px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.bookshelf-surface::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%);
+}
+
+/* Opened book overlay */
+.open-book-wrapper {
+  margin-top: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.open-book-wrapper.book-enter {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.open-book-wrapper.book-exit {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+}
+
+.open-book {
+  display: flex;
+  background: var(--page-bg);
+  border-radius: 2px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(100, 85, 60, 0.1);
+  overflow: hidden;
+  min-height: 180px;
+}
+
+.open-book-left {
+  flex: 1;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgba(100, 85, 60, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.open-book-left-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0.15;
+}
+
+.book-line {
+  height: 1px;
+  background: rgba(100, 85, 60, 0.5);
+}
+
+.open-book-left-text {
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  color: var(--page-text-sub);
+  text-align: center;
+  opacity: 0.4;
+}
+
+.open-book-spine {
+  width: 6px;
+  background: linear-gradient(180deg, rgba(100, 85, 60, 0.15) 0%, rgba(100, 85, 60, 0.08) 100%);
+}
+
+.open-book-right {
+  flex: 1.5;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.open-book-header { margin-bottom: 0.75rem; }
+
+.open-book-word {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  color: var(--page-text);
+  font-weight: 600;
+}
+
+.open-book-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.open-book-reading {
+  font-size: 0.75rem;
+  color: var(--page-text-sub);
+}
+
+.open-book-pos {
+  font-size: 0.625rem;
+  color: var(--page-text-sub);
+  background: rgba(88, 85, 56, 0.1);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+.open-book-body { flex: 1; }
+
+.open-book-definition {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--page-text-body);
+  line-height: 1.7;
+}
+
+.open-book-example {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--page-text-sub);
+  line-height: 1.7;
+  margin-top: 0.5rem;
+}
+
+.open-book-author {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--page-text-sub);
+}
+
+.open-book-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(100, 85, 60, 0.1);
+}
+
+.open-book-detail-link {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--accent-garnet);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.open-book-detail-link:hover { opacity: 0.7; }
+
+.open-book-close {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--page-text-sub);
+  background: transparent;
+  border: 1px solid rgba(100, 85, 60, 0.2);
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.open-book-close:hover {
+  border-color: var(--page-text-body);
+  color: var(--page-text-body);
+}
+
+/* ===== Home Browse Links ===== */
+.home-browse-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.home-browse-btn {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  color: var(--text-body);
+  text-decoration: none;
+  padding: 0.6rem 1.5rem;
+  border: 1px solid rgba(100, 85, 60, 0.25);
+  transition: all 0.2s;
+}
+
+.home-browse-btn:hover {
+  border-color: var(--text-sub);
+  color: var(--text-primary);
+}
+
+.home-browse-btn-sub {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.home-browse-btn-sub:hover {
+  color: var(--text-body);
+}
+
+/* ===== Paper Browse Links ===== */
+.paper-browse-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(100, 85, 60, 0.1);
+}
+
+.paper-browse-btn {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--text-body);
+  text-decoration: none;
+  text-align: center;
+  padding: 0.5rem;
+  border: 1px solid rgba(100, 85, 60, 0.2);
+  transition: all 0.2s;
+}
+
+.paper-browse-btn:hover {
+  border-color: var(--text-sub);
+  color: var(--text-primary);
+}
+
+.paper-browse-btn-sub {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  border: none;
+}
+
+.paper-browse-btn-sub:hover {
+  color: var(--text-body);
+}
+
+/* ===== Nonexistent Word Badge ===== */
+.paper-nonexistent-badge {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--accent-garnet);
+  background: rgba(121, 46, 41, 0.06);
+  border: 1px solid rgba(121, 46, 41, 0.15);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+/* ===== KojienEntry Button & Detail ===== */
+.kojien-entry-button {
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  color: inherit;
+}
+
+.kojien-entry-button:hover {
+  opacity: 0.8;
+}
+
+.kojien-entry-detail {
+  padding: 0.75rem 0 0.5rem;
+}
+
+.kojien-detail-card {
+  background: var(--page-bg);
+  border: 1px solid rgba(100, 85, 60, 0.1);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.kojien-detail-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+/* カード背景がクリーム(--page-bg)のため、文字は紙面用の濃い色を使う（視認性確保） */
+.kojien-detail-word {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--page-text);
+}
+
+.kojien-detail-reading {
+  font-size: 0.8125rem;
+  color: var(--page-text-sub);
+}
+
+.kojien-detail-pos {
+  font-size: 0.6875rem;
+  color: var(--page-text-sub);
+  background: rgba(88, 85, 56, 0.1);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.kojien-detail-definition {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--page-text-body);
+  line-height: 1.8;
+}
+
+.kojien-detail-example {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--page-text-sub);
+  margin-top: 0.5rem;
+  line-height: 1.7;
+}
+
+.kojien-detail-actions {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(100, 85, 60, 0.1);
+}
+
+/* ===== Hero (Tategaki Search Section) ===== */
+.tategaki-search-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 68px - 100px); /* header + footer */
+  position: relative;
+  z-index: 1;
+  padding: 40px 56px;
+}
+
+.tategaki-search-inner {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  gap: 44px;
+}
+
+.tategaki-search-hero-title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: var(--font-main);
+  font-size: 42px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.tategaki-search-hero-sub {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: var(--font-main);
+  font-size: 13px;
+  color: var(--textSoft);
+  line-height: 2.2;
+  letter-spacing: 0.15em;
+}
+
+.tategaki-search-rule {
+  width: 1px;
+  height: 160px;
+  background: var(--rule);
+  flex-shrink: 0;
+}
+
+.tategaki-search-form {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 10px;
+}
+
+.tategaki-search-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 11px;
+  color: var(--textMute);
+  letter-spacing: 0.3em;
+}
+
+.tategaki-search-input-wrap {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--textSoft);
+  width: 50px;
+  height: 380px;
+  /* 背景を塗って不透明に。降ってくる文字/こすくまは後ろのレイヤーに隠す */
+  background: var(--bg);
+}
+
+/* 縦書き入力欄: 透明な横書きinput(実入力) + 縦書きdiv(表示ミラー) を重ねる。
+   display/inputはともに4辺0の絶対配置でfieldを埋める（flex項目への
+   height:100%はブラウザによって0/autoに潰れるため使わない） */
+.tategaki-search-field {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+}
+
+/* ネイティブの縦書き検索入力。iOS17.4+/モダンブラウザは input/textarea の
+   writing-mode: vertical-rl をネイティブ対応するため、透明input＋ミラー＋末尾固定
+   キャレットの旧方式をやめ、実際に編集できる縦書き入力を直接使う
+   （実カーソルが見え、タップで途中にカーソルを置ける／選択・IMEもネイティブ）。 */
+.tategaki-search-input {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-writing-mode: vertical-rl;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  color: var(--text);
+  -webkit-text-fill-color: var(--text);
+  /* カーソルを背景に溶けない明るい色にして位置を分かりやすく */
+  caret-color: var(--text);
+  font-family: var(--font-main);
+  font-size: 16px;
+  letter-spacing: 0.15em;
+  padding: 12px 8px;
+}
+.tategaki-search-input::placeholder {
+  color: var(--textMute);
+  -webkit-text-fill-color: var(--textMute);
+  font-size: 14px;
+}
+.tategaki-search-input::selection { background: var(--textSoft); color: var(--bg); }
+.tategaki-search-input::-moz-selection { background: var(--textSoft); color: var(--bg); }
+.tategaki-search-input:disabled { opacity: 0.5; }
+
+.tategaki-search-button {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  width: 100%;
+  padding: 14px 8px;
+  background-color: var(--accent);
+  border: none;
+  border-top: 1px solid var(--textSoft);
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  letter-spacing: 0.4em;
+}
+
+.tategaki-search-button:hover:not(:disabled) { background-color: var(--accentDim); }
+.tategaki-search-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 未入力のうちは「引く」を控えめ色にして視線を奪わない。入力されると赤く"押せる"状態に。 */
+.tategaki-search-button.is-empty { background-color: var(--textMute); }
+
+/* 未入力のとき、入力欄（「ことばを登録する」）の枠だけを赤で点滅させて視線を誘導する。
+   枠は入力部分 .tategaki-search-field に inset box-shadow で描くため、
+   「引く」ボタンは点滅に含まれない（レイアウトも動かさない）。 */
+@keyframes searchInviteBlink {
+  0%, 45% { box-shadow: inset 0 0 0 2px var(--accent); }
+  55%, 100% { box-shadow: inset 0 0 0 2px rgba(179, 57, 42, 0); }
+}
+.tategaki-search-input-wrap.is-inviting .tategaki-search-field {
+  animation: searchInviteBlink 1.3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tategaki-search-input-wrap.is-inviting .tategaki-search-field {
+    animation: none;
+    box-shadow: inset 0 0 0 2px var(--accent);
+  }
+}
+
+/* トップ: 本棚（ほかの言葉）への導線。ぱっと見で分かる横書きのピルリンク。
+   PCは横並びレイアウト（row-reverse）を崩さないよう、注記類と同じく絶対配置で
+   下部中央に置く。モバイルは下の@mediaで通常フロー（検索の直下）に戻す。 */
+.home-browse-link {
+  position: absolute;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.5rem 1.1rem;
+  writing-mode: horizontal-tb;
+  text-orientation: initial;
+  font-size: 0.9375rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  border: 1px solid var(--textSoft);
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  z-index: 2;
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+.home-browse-link:hover {
+  color: #fff;
+  border-color: var(--accent);
+  background-color: var(--accent);
+}
+
+.tategaki-search-note {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 11px;
+  color: var(--textMute);
+  letter-spacing: 0.2em;
+  position: absolute;
+  left: 56px;
+  bottom: 20px;
+}
+
+/* ===== Dictionary Page (Tategaki Content) ===== */
+.dictionary-page {
+  background: var(--page-bg);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 2rem 2.5rem;
+  min-height: 400px;
+  height: auto;
+  overflow-x: auto;
+  position: relative;
+  box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.15);
+  line-height: 1.9;
+  letter-spacing: 0.05em;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.dictionary-page--rejection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.dict-rejection-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--page-text-body);
+  line-height: 1.9;
+}
+
+.dict-rejection-reason {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--page-text-sub);
+  line-height: 1.9;
+  margin-right: 1rem;
+}
+
+.dict-entry {
+  margin-left: 0.5rem;
+  align-self: flex-start;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.dict-headword {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1610;
+  border-right: 2px solid var(--accent-garnet);
+  padding-right: 0.5rem;
+  display: block;
+}
+
+.dict-reading {
+  font-size: 0.8125rem;
+  color: #585538;
+}
+
+.dict-pos {
+  font-size: 0.6875rem;
+  color: #585538;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.dict-definition {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: #2e2818;
+  line-height: 1.9;
+}
+
+.dict-example {
+  font-size: 0.875rem;
+  color: #2e2818;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dict-author {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  color: #585538;
+}
+
+.dict-page-number {
+  display: block;
+  font-family: var(--font-english);
+  font-size: 0.625rem;
+  color: rgba(100, 85, 60, 0.25);
+  text-align: right;
+  margin-top: 0.5rem;
+}
+
+/* Ink reveal animation for dictionary entries */
+.dictionary-page .ink-delay-1 { opacity: 0; animation: inkReveal 0.4s ease-out 0.0s forwards; }
+.dictionary-page .ink-delay-2 { opacity: 0; animation: inkReveal 0.4s ease-out 0.1s forwards; }
+.dictionary-page .ink-delay-3 { opacity: 0; animation: inkReveal 0.4s ease-out 0.2s forwards; }
+.dictionary-page .ink-delay-4 { opacity: 0; animation: inkReveal 0.4s ease-out 0.3s forwards; }
+
+/* Form area below the dictionary page (horizontal writing) */
+.dict-form-area {
+  writing-mode: horizontal-tb;
+  margin-top: 1.5rem;
+}
+
+.dict-edit-form {
+  margin-bottom: 1rem;
+}
+
+/* ===== Dictionary Page Content (for about/privacy) ===== */
+.dictionary-page-content {
+  color: #2e2818;
+}
+
+.dictionary-page-content h2,
+.dict-section-heading {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1610;
+  border-right: 2px solid var(--accent-garnet);
+  padding-right: 0.5rem;
+  margin-left: 1.5rem;
+}
+
+.dictionary-page-content p,
+.dict-section-text {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: #2e2818;
+  line-height: 1.9;
+  margin-left: 0.75rem;
+}
+
+.dictionary-page-content strong {
+  font-weight: 700;
+  color: #1a1610;
+}
+
+.dict-section-list {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: #2e2818;
+  line-height: 1.9;
+  margin-left: 0.75rem;
+  list-style-position: inside;
+}
+
+.dict-section-list li {
+  margin-bottom: 0.5rem;
+}
+
+.static-date-tategaki {
+  font-size: 0.8125rem;
+  color: #7a7460;
+  margin-left: 1rem;
+}
+
+/* ===== Result Page — Horizontal Scroll Container ===== */
+.h-scroll {
+  display: flex;
+  flex-direction: row;
+  direction: rtl;
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: 16px;
+  z-index: 50;
+  background: var(--bg);
+  gap: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
+}
+.h-scroll::-webkit-scrollbar { height: 6px; }
+.h-scroll::-webkit-scrollbar-track { background: transparent; }
+.h-scroll::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+.h-scroll > * { direction: ltr; flex-shrink: 0; }
+
+/* ===== 左スクロール・ヒント（縦書きで左にコンテンツが続くことを示す） ===== */
+.scroll-hint {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  bottom: 0;
+  width: 92px;
+  z-index: 60;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  /* 左端から内側へ向かうフェード＝「まだ左に続く」ことを示す */
+  background: linear-gradient(to right, rgba(31, 22, 16, 0.92) 0%, rgba(31, 22, 16, 0.55) 45%, rgba(31, 22, 16, 0) 100%);
+  animation: scrollHintFadeIn 0.45s ease both;
+}
+.scroll-hint-arrow {
+  font-size: 2.6rem;
+  line-height: 1;
+  color: var(--accent);
+  animation: scrollHintNudge 1.3s ease-in-out infinite;
+}
+.scroll-hint-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 0.8125rem;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(31, 22, 16, 0.9);
+}
+.scroll-hint.is-en .scroll-hint-text {
+  writing-mode: horizontal-tb;
+  max-width: 76px;
+  text-align: center;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+@keyframes scrollHintNudge {
+  0%, 100% { transform: translateX(0); opacity: 0.5; }
+  50% { transform: translateX(-12px); opacity: 1; }
+}
+@keyframes scrollHintFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint-arrow { animation: none; opacity: 1; }
+}
+
+/* ── Rejected (existing word) ── */
+.h-scroll.is-rejected {
+  justify-content: center;
+}
+
+/* ── Search column (rightmost) ── */
+.result-search-col {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  width: 240px;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  border-left: 1px solid var(--rule);
+  height: 100%;
+}
+.result-search-col .tategaki-search-input-wrap {
+  width: 44px;
+  height: 300px;
+}
+.result-hit-count {
+  font-size: 12px;
+  color: var(--textMute);
+  letter-spacing: 0.2em;
+}
+
+/* ── Body column (main content) ── */
+.result-body-col {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  column-width: 520px;
+  column-gap: 48px;
+  column-rule: 1px solid var(--rule);
+  line-height: 2.0;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  padding: 48px 56px;
+  min-height: 100%;
+}
+
+.result-reading {
+  font-size: 84px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  margin-left: 24px;
+}
+
+.result-headword {
+  font-size: 54px;
+  font-weight: 600;
+  color: var(--text);
+  margin-left: 20px;
+}
+.result-headword-bracket {
+  color: var(--textSoft);
+  font-weight: 400;
+}
+
+.result-pos-label {
+  display: inline-block;
+  border: 1px solid var(--textSoft);
+  color: var(--textSoft);
+  font-size: 14px;
+  padding: 4px 8px;
+  margin-left: 16px;
+  letter-spacing: 0.1em;
+}
+
+.result-definition {
+  font-size: 18px;
+  color: var(--text);
+  line-height: 2.0;
+  margin-left: 12px;
+}
+
+.result-def-number {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.result-example-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 6px;
+  margin: 0 2px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.result-separator {
+  color: var(--textMute);
+}
+
+/* ── Register column (left of body) ── */
+.result-register-col {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  min-width: 300px;
+  border-left: 2px solid var(--accent);
+  background: rgba(121, 46, 41, 0.06);
+}
+
+.result-unpublished-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 14px;
+  letter-spacing: 0.3em;
+  font-weight: 700;
+}
+
+.result-register-heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.15em;
+  line-height: 1.8;
+}
+
+.result-register-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.result-register-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.2em;
+}
+
+/* 入力欄だと分かるよう、枠＋薄い背景の「入力ボックス」にする（掲載者名の場所を明確化）。
+   iOSの縦書きinputバグ対策で、実入力は透明な横書きinput(__field)、
+   見た目は縦書きの__displayに映すミラー構成にしている */
+.result-register-input {
+  position: relative;
+  width: 100%;
+  /* 枠が背景に溶けて入力欄に見えなかったため、はっきり視認できる枠＋薄い塗りにする */
+  background: rgba(232, 217, 191, 0.06);
+  border: 1px solid var(--textMute);
+  border-radius: 6px;
+  min-height: 140px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.result-register-input:focus-within { border-color: var(--accent); background: rgba(255, 255, 255, 0.09); }
+
+/* ネイティブの縦書きinput。iOS Safari 17.4+ / モダンブラウザは input の
+   writing-mode: vertical-rl をネイティブ対応するため、透明input＋ミラーの旧方式をやめ、
+   実際に編集できる縦書きinputを直接使う（カーソル・タップ・選択・IMEがネイティブで効く）。 */
+.result-register-input__native {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 140px;
+  -webkit-writing-mode: vertical-rl;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--accent);
+  font-family: var(--font-main);
+  /* iOSは入力欄のfontが16px未満だとフォーカス時に自動ズームするため16pxにする */
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  padding: 10px 8px;
+}
+.result-register-input__native::placeholder {
+  color: var(--textMute);
+  -webkit-text-fill-color: var(--textMute);
+}
+.result-register-input__native::selection { background: var(--textSoft); color: var(--bg); }
+.result-register-input__native::-moz-selection { background: var(--textSoft); color: var(--bg); }
+
+/* ===== 携帯(タッチ): ネイティブ縦書きtextarea =====
+   変換中の青背景・スペースキー長押しでのカーソル移動・削除・タップ位置決めがOS標準で
+   効くよう、見えるネイティブtextareaを使う。非制御運用でカーソルは飛ばず削除は一文字ずつ。
+   文字サイズは元の16pxのまま。カーソルは標準だが色を明るくして見やすくする。 */
+textarea.result-register-input__native {
+  resize: none;
+  overflow: hidden;
+  line-height: 1.7;
+  caret-color: var(--text);
+}
+textarea.tategaki-search-input {
+  resize: none;
+  overflow: hidden;
+}
+
+.result-register-textarea {
+  writing-mode: vertical-rl;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--rule);
+  color: var(--text);
+  font-family: var(--font-main);
+  font-size: 15px;
+  padding: 8px;
+  outline: none;
+  resize: none;
+  min-height: 120px;
+  transition: border-color 0.2s;
+}
+.result-register-textarea:focus { border-right-color: var(--textSoft); }
+
+.result-cta-button {
+  writing-mode: vertical-rl;
+  background: var(--accent);
+  color: #fff;
+  /* 金色の縁取りで「押せるボタン」だと一目で分かるように */
+  border: 2px solid #d8b36a;
+  border-radius: 6px;
+  font-family: var(--font-main);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  padding: 28px 24px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  /* PCでは折り返さず一行（縦書きで一列）にする。モバイルは@mediaで通常折り返し */
+  white-space: nowrap;
+  height: auto;
+  width: 92px;
+  box-shadow: 2px 2px 12px rgba(121, 46, 41, 0.3);
+  /* 注意を引くため、ほのかに明滅させて存在感を出す */
+  animation: ctaPulse 2.2s ease-in-out infinite;
+}
+.result-cta-button:hover:not(:disabled) { background: var(--accentDim); transform: translateY(-2px); }
+.result-cta-button:active:not(:disabled) { transform: translateY(0); }
+.result-cta-button:disabled { opacity: 0.5; cursor: not-allowed; animation: none; }
+
+@keyframes ctaPulse {
+  0%, 100% {
+    box-shadow: 2px 2px 12px rgba(121, 46, 41, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(216, 179, 106, 0.28), 2px 2px 20px rgba(121, 46, 41, 0.55);
+  }
+}
+/* 「動きを減らす」設定の端末では明滅を止める */
+@media (prefers-reduced-motion: reduce) {
+  .result-cta-button { animation: none; }
+}
+
+.result-footer-bar {
+  writing-mode: horizontal-tb;
+  border-top: 1px solid var(--rule);
+  padding: 12px 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--textMute);
+  letter-spacing: 0.08em;
+}
+
+.result-edit-area {
+  writing-mode: horizontal-tb;
+  border-top: 1px dashed var(--rule);
+  padding: 12px 56px;
+  text-align: center;
+}
+
+.result-edit-btn {
+  background: transparent;
+  border: 1px dashed var(--rule);
+  color: var(--textMute);
+  font-size: 12px;
+  padding: 6px 20px;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: color 0.2s, border-color 0.2s;
+}
+.result-edit-btn:hover { color: var(--textSoft); border-color: var(--textSoft); }
+
+/* 編集パネル上部に固定する「編集を終了」ボタン。スクロールしても常に押せる */
+.result-edit-done-top {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  width: 100%;
+  border-style: solid;
+  background: var(--bg);
+  color: var(--text);
+  padding: 10px 20px;
+  font-size: 13px;
+}
+
+.result-edit-fields {
+  writing-mode: horizontal-tb;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+.result-edit-label {
+  font-size: 11px;
+  color: var(--textMute);
+  letter-spacing: 0.1em;
+}
+.result-edit-textarea {
+  width: 100%;
+  min-width: 280px;
+  min-height: 120px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--text);
+  font-family: var(--font-main);
+  /* iOSの自動ズーム防止のため16px */
+  font-size: 16px;
+  line-height: 1.8;
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+}
+.result-edit-textarea:focus {
+  border-color: var(--textSoft);
+}
+
+.result-edit-input,
+.result-edit-select {
+  width: 100%;
+  min-width: 280px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--text);
+  font-family: var(--font-main);
+  /* iOSの自動ズーム防止のため16px */
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  outline: none;
+}
+.result-edit-input:focus,
+.result-edit-select:focus {
+  border-color: var(--textSoft);
+}
+.result-edit-select {
+  /* ネイティブの矢印を活かしつつ背景を辞典トーンに */
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--textMute) 50%),
+    linear-gradient(135deg, var(--textMute) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 32px;
+}
+.result-edit-select option {
+  color: #000;
+}
+
+.result-error {
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+/* ── Existing word (rejection) ── */
+.reject-headword-col {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 48px 40px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stamp-unavailable {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg);
+  border: 3px double var(--accent);
+  color: var(--accent);
+  padding: 14px 22px;
+  font-size: 22px;
+  letter-spacing: 0.4em;
+  font-weight: 700;
+  writing-mode: vertical-rl;
+  opacity: 0.85;
+  z-index: 2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.reject-message-col {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 48px 40px;
+  font-size: 28px;
+  line-height: 2.2;
+  color: var(--text);
+  letter-spacing: 0.1em;
+}
+
+.reject-existing-col {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 48px 32px;
+  border-left: 1px solid var(--rule);
+  color: var(--textSoft);
+  font-size: 16px;
+  line-height: 2.0;
+  max-width: 400px;
+}
+
+.reject-existing-label {
+  display: inline-block;
+  border: 1px solid var(--textSoft);
+  color: var(--textSoft);
+  font-size: 12px;
+  padding: 3px 8px;
+  margin-left: 12px;
+  letter-spacing: 0.15em;
+}
+
+.reject-retry-col {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 48px 24px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.reject-retry-btn {
+  writing-mode: vertical-rl;
+  background: transparent;
+  border: 1px solid var(--textSoft);
+  color: var(--textSoft);
+  font-family: var(--font-main);
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  padding: 20px 14px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.reject-retry-btn:hover { color: var(--text); border-color: var(--text); }
+
+/* ── Right-to-left slide-in animation ── */
+@keyframes slideInFromRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.fade-in-rtl {
+  animation: slideInFromRight 0.7s cubic-bezier(.2,.7,.2,1) both;
+}
+.fade-in-rtl:nth-child(1) { animation-delay: 0s; }
+.fade-in-rtl:nth-child(2) { animation-delay: 0.12s; }
+.fade-in-rtl:nth-child(3) { animation-delay: 0.24s; }
+.fade-in-rtl:nth-child(4) { animation-delay: 0.36s; }
+.fade-in-rtl:nth-child(5) { animation-delay: 0.48s; }
+.fade-in-rtl:nth-child(6) { animation-delay: 0.60s; }
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-rtl { animation: none; opacity: 1; transform: none; }
+}
+
+/* ===== Mobile Hamburger Menu ===== */
+/* Hidden on PC */
+.mobile-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.hamburger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 1px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+/* Mobile overlay */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 199;
+}
+
+/* Mobile slide-down menu */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  z-index: 200;
+  transform: translateY(-100%);
+  transition: transform 0.2s ease-in;
+}
+
+.mobile-menu--open {
+  transform: translateY(0);
+  transition: transform 0.3s ease-out;
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  height: 48px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.mobile-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+}
+
+.close-line {
+  display: block;
+  position: absolute;
+  width: 20px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 1px;
+}
+
+.close-line-1 { transform: rotate(45deg); }
+.close-line-2 { transform: rotate(-45deg); }
+
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-menu-link {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  color: var(--text);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.mobile-menu-link:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+}
+
+.mobile-menu-lang {
+  display: flex;
+  gap: 0;
+  padding: 0.75rem 1.5rem;
+}
+
+.mobile-lang-item {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  color: var(--textMute);
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.mobile-lang-item:hover { color: var(--text); }
+.mobile-lang-item.active { color: var(--text); font-weight: 500; }
+
+/* ===== Language Badge ===== */
+.lang-badge {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  color: var(--text-sub);
+  border: 1px solid var(--text-sub);
+  padding: 0.0625rem 0.3rem;
+  border-radius: 2px;
+  margin-right: 0.375rem;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ===== English Word Styles ===== */
+.dictionary-page--en {
+  writing-mode: horizontal-tb;
+  text-orientation: initial;
+  font-family: var(--font-english), var(--font-main);
+  padding: 2.5rem 3rem;
+  line-height: 1.8;
+}
+
+.dict-entry-en {
+  margin-bottom: 0.75rem;
+}
+
+.dict-headword-en {
+  font-family: var(--font-english);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1610;
+  border-bottom: 2px solid var(--accent-garnet);
+  padding-bottom: 0.25rem;
+  display: inline;
+  margin-right: 0.75rem;
+}
+
+.dict-reading-en {
+  font-family: var(--font-english);
+  font-size: 0.875rem;
+  color: #585538;
+  margin-right: 0.5rem;
+}
+
+.dict-pos-en {
+  font-family: var(--font-english);
+  font-size: 0.8125rem;
+  color: #585538;
+  font-style: italic;
+}
+
+.dict-definition-en {
+  font-family: var(--font-english), var(--font-body);
+  font-size: 1rem;
+  color: #2e2818;
+  line-height: 1.8;
+}
+
+.dict-example-en {
+  font-family: var(--font-english), var(--font-body);
+  font-size: 0.875rem;
+  color: #4a4530;
+  font-style: italic;
+}
+
+.dict-author-en {
+  font-family: var(--font-english);
+  font-size: 0.75rem;
+  color: #585538;
+}
+
+/* ===== English mode search input ===== */
+.tategaki-search-input-wrap.en-mode {
+  flex-direction: row;
+  width: auto;
+  height: auto;
+}
+
+/* 英語モードは横書きの通常inputをそのまま見せる（ミラーdivは隠す） */
+.tategaki-search-input-wrap.en-mode .tategaki-search-field {
+  position: static;
+  flex: none;
+  width: auto;
+  height: auto;
+}
+.tategaki-search-input-wrap.en-mode .tategaki-search-display {
+  display: none;
+}
+.tategaki-search-input-wrap.en-mode .tategaki-search-input {
+  position: static;
+  color: var(--text);
+  -webkit-text-fill-color: currentColor;
+  caret-color: auto;
+}
+
+.tategaki-search-input.en-mode {
+  writing-mode: horizontal-tb;
+  text-orientation: initial;
+  width: auto;
+  height: auto;
+  min-width: 240px;
+  padding: 12px 16px;
+  font-family: var(--font-english), var(--font-main);
+  font-size: 16px;
+}
+
+.tategaki-search-input-wrap.en-mode .tategaki-search-button {
+  writing-mode: horizontal-tb;
+  text-orientation: initial;
+  width: auto;
+  padding: 12px 20px;
+  border-top: none;
+  border-left: 1px solid var(--textSoft);
+}
+
+/* ===== Index Mode Toggle ===== */
+.index-mode-toggle {
+  display: flex;
+  gap: 0;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--base-border);
+  display: inline-flex;
+}
+
+.index-mode-btn {
+  padding: 0.5rem 1.25rem;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  background: transparent;
+  border: none;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.index-mode-btn:not(:last-child) {
+  border-right: 1px solid var(--base-border);
+}
+
+.index-mode-btn.active {
+  background: var(--text-primary);
+  color: var(--base-bg);
+}
+
+.index-mode-btn:hover:not(.active) {
+  color: var(--text-primary);
+}
+
+/* A-Z sidebar compact */
+.az-sidebar {
+  flex-wrap: wrap;
+}
+
+/* ===== Word Language Classes ===== */
+.word-lang-en .kojien-entry-text {
+  font-family: var(--font-english), var(--font-body);
+}
+
+/* ===== Falling Words (Canvas-based) ===== */
+
+/* ===== Animation ===== */
+.fade-in { animation: fadeIn 0.5s ease-out; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Responsive (Mobile: 640px以下) ===== */
+@media (max-width: 640px) {
+  .page-wrapper { padding: 0 12px; }
+  .main-content { padding: 0; }
+
+  /* ===== 1. ヘッダー（ハンバーガーメニュー） ===== */
+  .site-header { z-index: 100; }
+  .header-inner { padding: 0.5rem 1rem; height: 48px; }
+  .header-logo { font-size: 0.875rem; }
+  .header-logo-en { display: none; }
+  /* PC用ナビを隠してハンバーガーを表示 */
+  .header-nav { display: none; }
+  .mobile-hamburger { display: flex; }
+  .mobile-overlay { display: block; }
+  .mobile-menu { display: block; }
+
+  /* ===== 2. トップページ検索セクション ===== */
+  .tategaki-search-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100dvh - 48px);
+    overflow: hidden;
+    padding: 0 1.5rem;
+    gap: 0;
+  }
+  .tategaki-search-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .tategaki-search-hero-title {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    font-size: 1.625rem;
+    text-align: center;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .tategaki-search-hero-sub {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    font-size: 0.6875rem;
+    text-align: center;
+    max-width: 280px;
+    line-height: 1.9;
+    letter-spacing: 0.08em;
+    color: #AB968F;
+    margin: 0;
+  }
+  .tategaki-search-rule { display: none; }
+  .tategaki-search-form {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+  }
+  .tategaki-search-label {
+    display: none;
+  }
+  .tategaki-search-input-wrap {
+    display: flex;
+    flex-direction: row-reverse;
+    border: 1px solid var(--textSoft);
+    width: auto;
+    height: auto;
+    position: relative;
+    margin: 0 auto;
+  }
+  .tategaki-search-field {
+    width: 2.75rem;
+    height: calc(12.6rem + 21px);
+    flex: none;
+  }
+  .tategaki-search-input {
+    font-size: 1rem;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+  }
+  .tategaki-search-input::placeholder {
+    font-size: 0.875rem;
+  }
+  .tategaki-search-button {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 0;
+    font-size: 0.9375rem;
+    width: 2.75rem;
+    height: calc(12.6rem + 21px);
+    border: none;
+    border-right: 1px solid var(--textSoft);
+    letter-spacing: 0.3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tategaki-search-note {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    position: static;
+    font-size: 0.625rem;
+    text-align: center;
+    color: var(--textMute);
+    max-width: 280px;
+    margin-top: 1rem;
+    left: auto;
+    bottom: auto;
+    letter-spacing: 0.1em;
+  }
+
+  /* 導線はモバイルでは画面最下部に、控えめなテキストリンクで置く（目立たせない） */
+  .home-browse-link {
+    position: absolute;
+    left: 50%;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: 0;
+    color: var(--textMute);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .home-browse-link:hover,
+  .home-browse-link:active {
+    color: var(--textSoft);
+    background: none;
+    border: none;
+  }
+  /* 入力中はキーボードで下部が狭まり被るため、携帯では入力があるとき導線を隠す */
+  .home-browse-link.is-typing {
+    display: none;
+  }
+
+  /* ===== 3. 検索結果（モバイル：フル画面横スクロール） ===== */
+  .h-scroll {
+    direction: rtl;
+    position: fixed;
+    top: 48px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: auto;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    z-index: 50;
+    background: var(--bg);
+    margin: 0;
+    /* 下端のホームインジケータ帯と内容が重ならないようsafe-area分を確保 */
+    padding: 8px 0 env(safe-area-inset-bottom) 0;
+    border-top: 1px solid var(--rule);
+    gap: 0;
+  }
+  .scroll-hint {
+    top: 48px;
+    width: 78px;
+  }
+  .scroll-hint-arrow { font-size: 2.2rem; }
+  .scroll-hint-text { font-size: 0.75rem; }
+  .h-scroll > * {
+    direction: ltr;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .result-search-col {
+    padding: 4px 6px;
+    min-width: unset;
+    width: auto;
+    gap: 4px;
+  }
+  .result-search-col .tategaki-search-input-wrap {
+    width: 36px; height: 200px;
+  }
+  .result-search-col .tategaki-search-input { font-size: 14px; padding: 8px 4px; }
+  .result-search-col .tategaki-search-button { padding: 10px 4px; font-size: 11px; }
+  .result-search-col .tategaki-search-label { font-size: 9px; }
+  .result-hit-count { font-size: 11px; }
+
+  .result-body-col {
+    padding: 4px 2px;
+    font-size: 0.8125rem;
+    line-height: 1.8;
+  }
+  .result-reading { font-size: 1.25rem; margin-left: 8px; }
+  .result-headword { font-size: 1.125rem; margin-left: 8px; }
+  .result-pos-label { font-size: 0.75rem; margin-left: 6px; padding: 3px 6px; }
+  .result-definition { margin-left: 6px; font-size: 0.8125rem; line-height: 1.8; }
+
+  /* 編集モード：モバイルでは .h-scroll が overflow-y:hidden で縦スクロールできず、
+     フィールドが縦に長いと用例欄が画面下で切れて触れなくなる。編集フォーム自体を
+     縦スクロール可能なボックスにして、すべてのフィールド（用例含む）に届くようにする。 */
+  .result-edit-fields {
+    max-height: calc(100dvh - 96px - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px 28px;
+  }
+  .result-edit-textarea { min-height: 92px; }
+
+  .result-register-col {
+    padding: 16px 12px;
+    min-width: 200px;
+    gap: 16px;
+  }
+  /* font-sizeは16pxのまま（iOSの自動ズーム防止）。paddingのみ調整 */
+  .result-register-input__native { padding: 6px; }
+  .result-cta-button {
+    padding: 18px 14px; font-size: 15px;
+    width: 70px; height: auto;
+    /* モバイルは従来どおり折り返す（PCのみ一行化） */
+    white-space: normal;
+  }
+  .result-unpublished-badge { font-size: 12px; padding: 6px 10px; }
+  .result-register-heading { font-size: 14px; }
+
+  .reject-headword-col { padding: 16px 12px; }
+  .reject-headword-col .result-reading { font-size: 1.5rem; }
+  .stamp-unavailable { font-size: 12px; padding: 5px 10px; }
+  .reject-message-col { padding: 16px 12px; font-size: 0.8125rem; line-height: 1.8; }
+  .reject-existing-col {
+    padding: 16px 12px;
+    font-size: 0.8125rem;
+  }
+  .reject-retry-col { padding: 12px; }
+  .reject-retry-btn { padding: 12px 8px; font-size: 12px; }
+
+  /* ===== 4. 辞書紙面（縦書き維持） ===== */
+  .dictionary-page {
+    height: auto;
+    min-height: 350px;
+    padding: 1.25rem 1rem;
+    min-width: unset;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.8125rem;
+  }
+  .dict-headword { font-size: 1.25rem; }
+  .dict-definition { font-size: 0.8125rem; line-height: 1.8; }
+  .dict-reading { font-size: 0.75rem; }
+  .dict-pos { font-size: 0.625rem; }
+  .dict-example { font-size: 0.75rem; }
+  .dict-author { font-size: 0.6875rem; }
+
+  /* 個別語ページ */
+  .word-detail-paper-wrapper {
+    padding: 0.5rem 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .word-detail-paper {
+    height: calc(100vh - 10rem);
+    height: calc(100dvh - 10rem); /* iOS Safariのツールバー分を可視領域に追従 */
+    padding: 1.5rem 1.5rem;
+    font-size: 0.875rem;
+  }
+  .wdp-headword {
+    font-size: 1.5rem;
+  }
+
+  /* ===== 5. 投稿フォーム（紙面上）→ 横書き ===== */
+  .dict-form-area { writing-mode: horizontal-tb; }
+
+  /* ===== 6. 五十音・辞書索引 ===== */
+  .gojuon-grid { gap: 3px; }
+  .gojuon-cell { width: 32px; height: 32px; font-size: 0.75rem; }
+
+  .dict-index-sidebar {
+    position: static; flex-direction: row; flex-wrap: wrap;
+    margin-right: 0; margin-bottom: 1rem;
+  }
+  .dict-index-tab {
+    border-radius: 4px 4px 0 0; border-right: 1px solid var(--base-border);
+    border-bottom: none; min-width: 32px; padding: 0.25rem 0.5rem;
+  }
+  .dict-index-tab.active {
+    border-bottom: 1px solid var(--base-bg);
+    border-right: 1px solid var(--base-border);
+  }
+  .dict-index-container { flex-direction: column; }
+  .dict-index-content {
+    border-left: none; border-top: 1px solid var(--base-border);
+    padding-left: 0; padding-top: 1rem;
+  }
+  .dict-index-kana { font-size: 0.75rem; }
+
+  /* ===== 7. ランキング ===== */
+  .ranking-item { padding: 0.75rem 0; }
+  .ranking-rank { font-size: 1.25rem; }
+
+  /* ===== 8. 個別語ページ ===== */
+  .word-title { font-size: 1.5rem; }
+  .word-card { padding-left: 1rem; }
+  .word-actions {
+    writing-mode: horizontal-tb;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+  }
+  .share-buttons { justify-content: center; }
+
+  /* ===== 9. 本棚 ===== */
+  .bookshelf-books { padding: 0 0.5rem; gap: 3px; min-height: 160px; }
+  .book-spine { width: 32px; height: 150px; padding: 8px 3px; }
+  .spine-title { font-size: 0.625rem; }
+  .book-spine-title { font-size: 0.75rem; }
+  .open-book { flex-direction: column; }
+  .open-book-left { display: none; }
+  .open-book-spine { display: none; }
+  .open-book-right { flex: 1; }
+
+  /* ===== 10. シェア画面 ===== */
+  .share-dict-page { margin: 1.5rem auto 0; }
+  .share-dict-body { padding: 1.5rem 1rem; }
+  .share-dict-word { font-size: 1.5rem; }
+
+  /* ===== 11. その他 ===== */
+  .recent-word-row { flex-wrap: wrap; }
+  .recent-word-def { width: 100%; white-space: normal; }
+  .dict-page__paper { padding: 1rem; }
+  .page-word-title { font-size: 1.25rem; }
+  .page-title { font-size: 1.125rem; }
+  .page-subtitle { font-size: 0.8125rem; }
+  .paper-card { margin-top: 1rem; }
+  .paper-body { padding: 1rem; }
+  .paper-word-title { font-size: 1.125rem; }
+  .paper-definition { font-size: 0.8125rem; }
+  .paper-register-heading { font-size: 0.8125rem; }
+  .paper-register-input { font-size: 0.875rem; }
+  .paper-nonexistent-badge { font-size: 0.75rem; padding: 0.375rem 0.5rem; }
+  .kojien-detail-card { padding: 0.75rem 1rem; }
+  .kojien-detail-word { font-size: 1rem; }
+  .kojien-preview-actions { flex-direction: column; }
+
+  /* ===== 12. フッター ===== */
+  .site-footer { padding: 20px 16px; }
+  .footer-title { font-size: 11px; }
+  .footer-sub { font-size: 10px; }
+  .footer-nav { gap: 20px; }
+  .footer-nav a { font-size: 11px; }
+
+  /* ===== 12b. 蔵書印通知（モバイル） ===== */
+  .empty-word-notice {
+    min-width: 3.25rem;
+    min-height: calc(100vh - 5rem);
+    padding: 0.75rem 0.5rem;
+    gap: 0.3125rem;
+    margin: 0;
+  }
+  .notice-line-1, .notice-line-2 { font-size: 0.9375rem; }
+  .notice-line-3 { font-size: 0.8125rem; }
+
+  /* ===== 13. モーダル ===== */
+  .random-modal-overlay { padding: 1.5rem 0.75rem; }
+  .random-modal-body { padding: 1rem; }
+  .random-modal-word { font-size: 1.25rem; }
+}
+
+/* ===== Submit Form ===== */
+.submit-section { margin-top: 2rem; }
+
+.submit-divider {
+  height: 1px;
+  background: var(--base-border);
+  margin-bottom: 2rem;
+}
+
+.submit-container { max-width: 560px; margin: 0 auto; }
+
+.submit-heading {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.submit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.submit-field { width: 100%; }
+
+.submit-input {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background-color: var(--base-bg);
+  border: 1px solid var(--base-border);
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 1.0625rem;
+  letter-spacing: 0.05em;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.submit-input:focus { border-color: var(--text-sub); }
+.submit-input::placeholder { color: var(--text-placeholder); font-size: 0.9375rem; }
+.submit-input:disabled { opacity: 0.5; }
+
+.submit-textarea {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background-color: var(--base-bg);
+  border: 1px solid var(--base-border);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+
+.submit-textarea:focus { border-color: var(--text-sub); }
+.submit-textarea::placeholder { color: var(--text-placeholder); }
+.submit-textarea:disabled { opacity: 0.5; }
+
+.submit-button {
+  padding: 0.875rem 2rem;
+  background-color: var(--accent-garnet);
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover:not(:disabled) { background-color: var(--accent-garnet-hover); }
+.submit-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.submit-loading { letter-spacing: 0.15em; }
+
+.submit-note {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--text-sub);
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+/* ===== Kojien Entry ===== */
+.kojien-entry {
+  border-bottom: 1px solid var(--base-border);
+  transition: background-color 0.2s;
+}
+
+.kojien-entry:last-child { border-bottom: none; }
+
+.kojien-entry:hover { background-color: var(--base-hover); }
+
+.kojien-entry-link {
+  display: block;
+  padding: 1rem 0.5rem;
+  color: inherit;
+}
+
+.kojien-entry-link:hover { color: inherit; }
+
+.kojien-entry-text {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--text-body);
+  line-height: 1.8;
+}
+
+.kojien-word {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.kojien-entry-meta {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--text-sub);
+  margin-top: 0.375rem;
+  text-align: right;
+}
+
+/* ===== Kojien Preview ===== */
+.kojien-preview-container {
+  max-width: 560px;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.kojien-preview-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-sub);
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+}
+
+.kojien-preview-card {
+  background-color: var(--page-bg);
+  padding: 2rem 1.5rem;
+  border-radius: 2px;
+  box-shadow: 2px 2px 12px rgba(0,0,0,0.15);
+  margin-bottom: 1.5rem;
+}
+
+.kojien-preview-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--page-text);
+  line-height: 2;
+  text-align: left;
+}
+
+.kojien-preview-prompt {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  margin-bottom: 1rem;
+}
+
+.kojien-preview-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.kojien-preview-confirm {
+  padding: 0.75rem 2rem;
+  background-color: var(--accent-garnet);
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background-color 0.2s;
+}
+
+.kojien-preview-confirm:hover:not(:disabled) { background-color: var(--accent-garnet-hover); }
+.kojien-preview-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.kojien-preview-retry {
+  padding: 0.75rem 2rem;
+  background: transparent;
+  border: 1px solid var(--base-border);
+  color: var(--text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.kojien-preview-retry:hover { border-color: var(--text-sub); color: var(--text-primary); }
+.kojien-preview-retry:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.kojien-preview-success {
+  padding: 2rem;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  color: var(--text-sub);
+  letter-spacing: 0.05em;
+}
+
+/* ===== Recent Words ===== */
+.recent-words {
+  margin-bottom: 2rem;
+}
+
+.recent-words-heading {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-sub);
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+.recent-words-empty {
+  font-size: 0.875rem;
+  color: var(--text-sub);
+  line-height: 1.8;
+}
+
+/* ===== Rejection ===== */
+.rejection-container {
+  max-width: 560px;
+  margin: 3rem auto;
+  text-align: center;
+}
+
+.rejection-card {
+  padding: 2.5rem 2rem;
+}
+
+.rejection-text {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--text-body);
+  line-height: 2;
+  margin-bottom: 1rem;
+}
+
+.rejection-reason {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  margin-bottom: 1.5rem;
+}
+
+.rejection-retry {
+  padding: 0.75rem 2rem;
+  background: transparent;
+  border: 1px solid var(--base-border);
+  color: var(--text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rejection-retry:hover { border-color: var(--text-sub); color: var(--text-primary); }
+
+/* ===== Daily Word ===== */
+.daily-word {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.daily-word-label {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  letter-spacing: 0.2em;
+  margin-bottom: 1rem;
+  padding: 0.25rem 1rem;
+  border: 1px solid var(--base-border);
+}
+
+.daily-word-card {
+  display: block;
+  background-color: var(--page-bg);
+  padding: 2rem 1.5rem;
+  border-radius: 2px;
+  box-shadow: 2px 2px 12px rgba(0,0,0,0.15);
+  margin: 1rem 0;
+  transition: box-shadow 0.2s;
+  color: inherit;
+}
+
+.daily-word-card:hover {
+  box-shadow: 2px 2px 16px rgba(0,0,0,0.25);
+  color: inherit;
+}
+
+.daily-word-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--page-text);
+  line-height: 2;
+  text-align: left;
+}
+
+.daily-word-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+/* ===== Author Title ===== */
+.author-title {
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  color: var(--text-sub);
+  letter-spacing: 0.1em;
+  border: 1px solid var(--base-border);
+  padding: 0.125rem 0.5rem;
+  margin-left: 0.5rem;
+}
+
+/* ===== Random Word Button ===== */
+.random-word-button {
+  background: transparent;
+  border: 1px solid var(--base-border);
+  color: var(--text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  transition: color 0.2s, border-color 0.2s;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.random-word-button:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--text-sub);
+}
+
+.random-word-button:disabled { opacity: 0.5; }
+
+/* Random Word Modal */
+.random-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1rem 2rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.random-modal {
+  background: var(--page-bg);
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.random-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(100, 85, 60, 0.1);
+}
+
+.random-modal-label {
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  color: var(--page-text-sub);
+  letter-spacing: 0.1em;
+}
+
+.random-modal-close {
+  background: none;
+  border: none;
+  color: var(--page-text-sub);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.random-modal-close:hover { color: var(--page-text); }
+
+.random-modal-body {
+  padding: 1.5rem 1.25rem;
+}
+
+.random-modal-intro {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--page-text-sub);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.random-modal-word {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--page-text);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.random-modal-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.random-modal-reading {
+  font-size: 0.8125rem;
+  color: var(--page-text-sub);
+}
+
+.random-modal-pos {
+  font-size: 0.625rem;
+  color: var(--page-text-sub);
+  background: rgba(88, 85, 56, 0.1);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.random-modal-definition {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--page-text-body);
+  line-height: 1.8;
+}
+
+.random-modal-example {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--page-text-sub);
+  margin-top: 0.5rem;
+  line-height: 1.7;
+}
+
+.random-modal-author {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--page-text-sub);
+  text-align: right;
+  margin-top: 1rem;
+}
+
+.random-modal-actions {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(100, 85, 60, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.random-modal-retry {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--page-text-sub);
+  background: transparent;
+  border: 1px solid rgba(100, 85, 60, 0.2);
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.random-modal-retry:hover {
+  border-color: var(--page-text-body);
+  color: var(--page-text-body);
+}
+
+.random-modal-number {
+  font-family: var(--font-english);
+  font-size: 0.75rem;
+  color: var(--accent-garnet);
+  text-align: center;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.random-modal-close-btn {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--page-text-sub);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  transition: color 0.2s;
+}
+
+.random-modal-close-btn:hover {
+  color: var(--page-text-body);
+}
+
+@media (max-width: 480px) {
+  .random-modal-overlay { padding: 1.5rem 0.75rem; }
+  .random-modal-body { padding: 1rem; }
+  .random-modal-word { font-size: 1.25rem; }
+}
+
+/* ===== My Page ===== */
+.my-header { padding: 2rem 0 1rem; }
+
+.my-profile {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.my-nickname {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  color: var(--text-primary);
+}
+
+.my-author-title {
+  font-size: 0.75rem;
+}
+
+.my-section {
+  margin-bottom: 2.5rem;
+}
+
+.my-section-heading {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  color: var(--text-sub);
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--base-border);
+}
+
+.my-empty {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.my-empty-link {
+  display: inline-block;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-sub);
+  border: 1px solid var(--base-border);
+  padding: 0.5rem 1.5rem;
+  transition: all 0.2s;
+}
+
+.my-empty-link:hover {
+  border-color: var(--text-sub);
+  color: var(--text-primary);
+}
+
+/* ===== Kojien Entry with Like ===== */
+.kojien-entry-inner {
+  display: flex;
+  align-items: flex-start;
+}
+
+.kojien-entry-link { flex: 1; min-width: 0; }
+
+.kojien-entry-like {
+  flex-shrink: 0;
+  padding-top: 0.75rem;
+}
+
+/* ===== Gojuon Tab Count ===== */
+.gojuon-tab-count {
+  display: block;
+  font-size: 0.5625rem;
+  color: var(--text-sub);
+  opacity: 0.6;
+  line-height: 1;
+  margin-top: 0.125rem;
+}
+
+/* ===== Browse Page Redesign (辞書索引風) ===== */
+.browse-header { padding: 2rem 0 1rem; }
+
+/* 検索バー */
+.browse-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+}
+.browse-search-input {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--text);
+  font-family: var(--font-main);
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  letter-spacing: 0.05em;
+}
+.browse-search-input:focus {
+  border-color: var(--textSoft);
+}
+.browse-search-input::placeholder {
+  color: var(--textMute);
+}
+.browse-search-clear {
+  background: transparent;
+  border: none;
+  color: var(--textMute);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.browse-search-results {
+  margin-bottom: 2rem;
+}
+
+/* ページネーション */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 2rem;
+  padding: 1rem 0;
+}
+.pagination-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--text);
+  font-size: 16px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.pagination-btn:hover:not(:disabled) {
+  border-color: var(--textSoft);
+}
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.pagination-info {
+  font-size: 13px;
+  color: var(--textMute);
+  letter-spacing: 0.1em;
+}
+
+/* 索引コンテナ：サイドバー＋コンテンツ */
+.dict-index-container {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+
+/* サイドバー（辞書のつめ/サムインデックス） */
+.dict-index-sidebar {
+  position: sticky;
+  top: 60px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  z-index: 10;
+  margin-right: -1px;
+}
+
+.dict-index-tab {
+  background: var(--base-card);
+  border: 1px solid var(--base-border);
+  border-right: none;
+  padding: 0.375rem 0.625rem;
+  color: var(--text-sub);
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  position: relative;
+  min-width: 42px;
+  border-radius: 4px 0 0 4px;
+  margin-bottom: -1px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.dict-index-tab:hover {
+  background: var(--base-hover);
+  color: var(--text-primary);
+}
+
+.dict-index-tab.active {
+  background: var(--base-bg);
+  color: var(--text-primary);
+  border-right: 1px solid var(--base-bg);
+  font-weight: 600;
+  z-index: 2;
+}
+
+.dict-index-tab.empty { opacity: 0.25; }
+
+.dict-index-kana {
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.dict-index-count {
+  font-size: 0.5rem;
+  opacity: 0.5;
+  line-height: 1;
+}
+
+/* メインコンテンツ */
+.dict-index-content {
+  flex: 1;
+  min-width: 0;
+  border-left: 1px solid var(--base-border);
+  padding-left: 1.25rem;
+}
+
+/* 各行セクション */
+.dict-index-section {
+  margin-bottom: 2.5rem;
+  scroll-margin-top: 4rem;
+}
+
+.dict-index-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.dict-index-heading-kana {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.dict-index-heading-label {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  letter-spacing: 0.15em;
+}
+
+.dict-index-heading-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--base-border), transparent);
+}
+
+.browse-entries { margin-top: 0; }
+
+/* Legacy compatibility */
+.gojuon-tabs { display: none; }
+
+.browse-row-empty {
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  opacity: 0.4;
+  text-align: center;
+  padding: 0.75rem 0;
+  border: 1px dashed var(--base-border);
+}
+
+.browse-row-entries {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Share Dictionary Page (掲載後シェアページ) ===== */
+.share-dict-page {
+  max-width: 520px;
+  margin: 2rem auto 0;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.share-dict-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--text-sub);
+}
+
+.share-dict-label {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  letter-spacing: 0.15em;
+}
+
+.share-dict-page-num {
+  font-family: var(--font-english);
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+.share-dict-body {
+  background: var(--page-bg);
+  color: var(--page-text);
+  padding: 2.5rem 2rem 2rem;
+  position: relative;
+  border-radius: 2px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.3), inset 0 0 60px rgba(0,0,0,0.03);
+  text-align: left;
+}
+
+.share-dict-body::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--accent-garnet);
+}
+
+.share-dict-lines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent, transparent 1.8em,
+    rgba(100, 85, 60, 0.08) 1.8em, rgba(100, 85, 60, 0.08) calc(1.8em + 1px)
+  );
+  pointer-events: none;
+}
+
+.share-dict-word {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--page-text);
+  margin-bottom: 0.25rem;
+  position: relative;
+}
+
+.share-dict-reading {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--page-text-sub);
+  margin-bottom: 0.5rem;
+}
+
+.share-dict-pos {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--page-text-sub);
+  border: 1px solid var(--page-text-sub);
+  padding: 0.125rem 0.5rem;
+  border-radius: 2px;
+  margin-bottom: 1rem;
+}
+
+.share-dict-definition {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 2;
+  color: var(--page-text);
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.share-dict-example {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--page-text-body);
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.share-dict-example-label {
+  color: var(--page-text-sub);
+  margin-right: 0.25em;
+}
+
+.share-dict-author {
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  color: var(--page-text-sub);
+  text-align: right;
+  margin-top: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(100, 85, 60, 0.15);
+}
+
+.share-dict-congrats {
+  margin-top: 2rem;
+  padding: 1.5rem 0;
+}
+
+.share-dict-congrats-text {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.share-dict-congrats-sub {
+  font-size: 0.8125rem;
+  color: var(--text-sub);
+  line-height: 2;
+}
+
+.share-dict-actions {
+  margin: 1.5rem 0;
+}
+
+.share-dict-actions .share-buttons {
+  justify-content: center;
+  gap: 1rem;
+}
+
+.share-dict-actions .share-button {
+  padding: 0.875rem 2rem;
+  font-size: 0.9375rem;
+}
+
+.share-dict-continue {
+  background: transparent;
+  border: 1px solid var(--base-border);
+  color: var(--text-sub);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  padding: 0.75rem 2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+}
+
+.share-dict-continue:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+/* (480px block merged into 640px above) */
+
+/* ===== シェア画面: 遷移時の上スライドを無効化（フェードのみ） =====
+   .fade-in の translateY(16px) で「少しアップ」して見えるのを防ぐ。
+   二重クラスで .fade-in より詳細度を上げて確実に上書き。 */
+@keyframes fadeInStatic {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.share-dict-page.fade-in,
+.word-detail-paper--share.fade-in {
+  animation: fadeInStatic 0.5s ease-out;
+}
+
+/* ===== 五十音索引: モバイルレイアウトの再適用 =====
+   .dict-index-* の基本(PC)ルールがこのファイルの後方にあり、
+   @media(640px) を後勝ちで上書きしてしまうため、末尾で再宣言して
+   モバイルでは「タブを上に横並び・本文は下」に戻す（被り解消）。 */
+@media (max-width: 640px) {
+  .dict-index-container {
+    flex-direction: column;
+  }
+  .dict-index-sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-self: stretch;
+    margin-right: 0;
+    margin-bottom: 1rem;
+    z-index: auto;
+  }
+  .dict-index-tab {
+    border-radius: 4px 4px 0 0;
+    border-right: 1px solid var(--base-border);
+    border-bottom: none;
+    min-width: 32px;
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0;
+  }
+  .dict-index-tab.active {
+    border-bottom: 1px solid var(--base-bg);
+    border-right: 1px solid var(--base-border);
+  }
+  .dict-index-content {
+    border-left: none;
+    border-top: 1px solid var(--base-border);
+    padding-left: 0;
+    padding-top: 1rem;
+  }
+}
+
+/* ===== ランキング本棚: 携帯で横5列に固定 =====
+   JSXは5冊ずつ行にしているが、本が広く折り返していたため、
+   携帯では折り返しなし・等幅(1/5)で確実に5列に並べる。
+   末尾で再宣言し、2重定義(flex-wrap:wrap/固定幅)に後勝ちさせる。 */
+@media (max-width: 640px) {
+  .bookshelf-books {
+    flex-wrap: nowrap;
+    gap: 3px;
+    padding: 0 0.5rem;
+    justify-content: center;
+  }
+  .book-spine {
+    width: calc((100% - 12px) / 5);
+    min-width: 0;
+    flex: none;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+}
+
+/* ===== 英語の単語詳細/シェア: 携帯では縦積みで読みやすく =====
+   PCは横並び(row-reverse)で良いが、携帯だと3ブロックが圧縮され定義が
+   1〜2語ずつ折れて読みづらい。携帯のみ縦積み(見出し→定義→例文・全幅)に。 */
+@media (max-width: 640px) {
+  /* ページ全体の横はみ出しをクリップ（はみ出しで100vwが膨らみカードが溢れるのを防ぐ）。
+     clipはhiddenと違いsticky等を壊さない */
+  .main-content {
+    overflow-x: clip;
+  }
+  /* flexのサイズ計算でカードが画面幅を超えるため、携帯ではブロック＋全幅にして
+     縦積み＆確実にコンテナ内で折り返す */
+  .dictionary-page.dictionary-page--en {
+    display: block;
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 1.5rem 0 !important;
+    padding: 1.5rem 1.25rem;
+    overflow-x: hidden;
+  }
+  .dictionary-page--en .dict-entry-en {
+    width: auto;
+    max-width: 100%;
+    margin-bottom: 0.75rem;
+  }
+  .dictionary-page--en .dict-definition-en,
+  .dictionary-page--en .dict-example-en {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+}
+
+/* ===== 無限スクロールのセンチネル ===== */
+.bookshelf-sentinel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 48px;
+  padding: 1rem 0;
+}
+
+/* ===== 登録上限（5単語）入れ替えモーダル ===== */
+.limit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(20, 16, 12, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  backdrop-filter: blur(2px);
+}
+/* 明るい紙色・濃い文字で、ダークモードでも確実に読みやすくする（テーマ非依存の固定色） */
+.limit-modal {
+  background: #f4efe3;
+  color: #2b2118;
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid #d8cdb8;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  padding: 1.5rem 1.4rem 1.3rem;
+}
+.limit-modal-title {
+  font-family: var(--font-serif, serif);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #2b2118;
+  margin: 0 0 0.5rem;
+}
+.limit-modal-desc {
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: #6b5d49;
+  margin: 0 0 1rem;
+}
+.limit-count-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #792e29;
+  background: #f6e7e3;
+  border: 1px solid #e3c9c3;
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  margin-bottom: 0.85rem;
+}
+/* 5つちょうどでないとき（多すぎ/少なすぎ）は注意色に */
+.limit-count-badge.is-over {
+  color: #fff;
+  background: #b97a72;
+  border-color: #b97a72;
+}
+.limit-word-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.limit-word-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid #ddd2bd;
+  border-radius: 9px;
+  background: #fffdf8;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.limit-word-row:hover { background: #fffaf0; border-color: #c9bda3; }
+.limit-word-row.is-pending {
+  cursor: pointer;
+  background: #f7ece9;
+  border-style: dashed;
+  border-color: #b97a72;
+}
+.limit-word-check {
+  margin-top: 0.1rem;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  accent-color: #792e29;
+  cursor: pointer;
+}
+.limit-word-main { min-width: 0; flex: 1; }
+.limit-word-head {
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: #2b2118;
+  margin-bottom: 0.2rem;
+  word-break: break-word;
+}
+.limit-word-def {
+  font-size: 0.78rem;
+  color: #6b5d49;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.limit-word-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  color: #fff;
+  background: #792e29;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+/* インライン削除確認（window.confirmは使わない） */
+.limit-word-confirm {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed #ddd2bd;
+}
+.limit-word-confirm-text {
+  display: block;
+  font-size: 0.78rem;
+  color: #792e29;
+  margin-bottom: 0.5rem;
+}
+.limit-confirm-buttons { display: flex; gap: 0.5rem; }
+.limit-confirm-del {
+  background: #792e29;
+  color: #fff;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.5rem 0.95rem;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.limit-confirm-del:disabled { opacity: 0.6; cursor: default; }
+.limit-confirm-cancel {
+  background: transparent;
+  color: #6b5d49;
+  border: 1px solid #ddd2bd;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  padding: 0.5rem 0.95rem;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.limit-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+.limit-modal-cancel {
+  background: transparent;
+  border: 1px solid #ddd2bd;
+  color: #6b5d49;
+  font-family: var(--font-ui);
+  font-size: 0.84rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.limit-modal-cancel:hover { color: #2b2118; border-color: #c9bda3; }
+
+/* 「この5つの単語を登録」ボタン */
+.limit-register-btn {
+  background: #792e29;
+  color: #fff;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0.55rem 1.2rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+.limit-register-btn:hover:not(:disabled) { background: #5f231f; }
+.limit-register-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* 最終確認（本当にこの単語にしますか？） */
+.limit-confirm-box {
+  border-top: 1px dashed #ddd2bd;
+  padding-top: 0.85rem;
+}
+.limit-confirm-q {
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: #792e29;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+.limit-modal-error {
+  display: block;
+  color: #b00020;
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+/* 「この言葉を辞典に載せる」ボタンと登録数を縦に積む。
+   .result-register-col は vertical-rl のため flex-direction:row が「上下方向」になる */
+.result-cta-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+/* 検索結果欄の登録数表示（◯/5）。ボタンの下に横書きで小さく出す */
+.result-register-count {
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  font-size: 0.78rem;
+  color: var(--textMute);
+  letter-spacing: 0.04em;
+}
+.result-register-count.is-full { color: var(--accent); font-weight: 700; }
+
+/* TOPの登録上限の控えめな注記。
+   デスクトップは縦書きで、下部の注意事項(.tategaki-search-note)の隣に並べる */
+.search-limit-note {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  position: absolute;
+  left: 84px;
+  bottom: 20px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--textMute);
+  letter-spacing: 0.2em;
+  z-index: 1;
+}
+
+/* TOP検索の失敗メッセージ（無言でidleに戻る挙動の解消）。縦書きレイアウト上で
+   確実に目に入るよう、横書き・中央寄せ・アクセント色の帯で表示する。 */
+.search-lookup-error {
+  position: absolute;
+  left: 50%;
+  bottom: 56px;
+  transform: translateX(-50%);
+  max-width: min(92vw, 420px);
+  margin: 0;
+  padding: 10px 16px;
+  writing-mode: horizontal-tb;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+  background: rgba(179, 57, 42, 0.16);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  z-index: 3;
+}
+/* モバイルは静的・横書きにして、注意事項のすぐ上に詰めて表示 */
+@media (max-width: 640px) {
+  .search-limit-note {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    position: static;
+    left: auto;
+    bottom: auto;
+    text-align: center;
+    font-size: 0.625rem;
+    letter-spacing: 0.1em;
+    margin: 0.4rem 0 0;
+  }
+  /* 直下の注意事項との隙間を詰める */
+  .tategaki-search-note--tight { margin-top: 0.25rem; }
+}
+
+/* 3タブが狭い画面でも収まるように */
+@media (max-width: 640px) {
+  .ranking-tab { padding: 0.7rem 0.9rem; font-size: 0.82rem; }
+  .ranking-tabs { justify-content: center; }
+}

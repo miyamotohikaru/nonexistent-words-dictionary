@@ -1,0 +1,73 @@
+export type WordLanguage = "ja" | "en";
+
+export interface WordEntry {
+  id: string;
+  word: string;
+  reading: string;
+  partOfSpeech: string;
+  definition: string;
+  etymology: string;
+  examples: string[];
+  synonyms: string;
+  nickname: string;
+  likes: number;
+  viewCount: number;
+  isVisible: boolean;
+  source: "user" | "ai";
+  kojienFormatted: string;
+  authorToken: string;
+  language: WordLanguage;
+  featuredDate?: string | null;
+  createdAt?: string | null;
+}
+
+export interface WordFormData {
+  word: string;
+  reading: string;
+  partOfSpeech: string;
+  definition: string;
+  etymology?: string;
+  examples?: string[];
+  synonyms?: string;
+  nickname: string;
+  language?: WordLanguage;
+}
+
+export const PARTS_OF_SPEECH = [
+  "名詞",
+  "動詞",
+  "形容詞",
+  "形容動詞",
+  "副詞",
+  "感動詞",
+  "連体詞",
+  "接続詞",
+  "その他",
+] as const;
+
+// 濁音・半濁音は清音の行にまとめ、各行内は「清音 → 濁音 → 半濁音」の順に並べる
+export const GOJUON_ROWS = [
+  { label: "あ行", kana: ["あ", "い", "う", "え", "お"] },
+  { label: "か行", kana: ["か", "き", "く", "け", "こ", "が", "ぎ", "ぐ", "げ", "ご"] },
+  { label: "さ行", kana: ["さ", "し", "す", "せ", "そ", "ざ", "じ", "ず", "ぜ", "ぞ"] },
+  { label: "た行", kana: ["た", "ち", "つ", "て", "と", "だ", "ぢ", "づ", "で", "ど"] },
+  { label: "な行", kana: ["な", "に", "ぬ", "ね", "の"] },
+  { label: "は行", kana: ["は", "ひ", "ふ", "へ", "ほ", "ば", "び", "ぶ", "べ", "ぼ", "ぱ", "ぴ", "ぷ", "ぺ", "ぽ"] },
+  { label: "ま行", kana: ["ま", "み", "む", "め", "も"] },
+  { label: "や行", kana: ["や", "ゆ", "よ"] },
+  { label: "ら行", kana: ["ら", "り", "る", "れ", "ろ"] },
+  { label: "わ行", kana: ["わ", "を", "ん"] },
+];
+
+export const PARTS_OF_SPEECH_EN = [
+  "noun",
+  "verb",
+  "adjective",
+  "adverb",
+  "interjection",
+  "preposition",
+  "conjunction",
+  "other",
+] as const;
+
+export const ALPHABET_INDEX = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
