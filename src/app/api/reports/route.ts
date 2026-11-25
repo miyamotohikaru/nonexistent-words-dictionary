@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
+import { WORDS_ALL_TAG } from "@/lib/cache-tags";
 import { getDb, getFieldValue, isFirebaseAvailable } from "@/lib/firebase";
 import { getWord } from "@/lib/in-memory-store";
 
@@ -37,6 +39,8 @@ export async function POST(request: NextRequest) {
 
       if (reportsSnapshot.size >= 3) {
         await db.collection("words").doc(wordId).update({ isVisible: false });
+        // 一覧ページ用の全語キャッシュから即時に外す
+        revalidateTag(WORDS_ALL_TAG);
       }
 
       return NextResponse.json({ success: true });

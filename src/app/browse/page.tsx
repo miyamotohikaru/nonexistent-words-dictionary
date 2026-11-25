@@ -28,20 +28,12 @@ export default function BrowsePage() {
     let aborted = false;
     (async () => {
       try {
-        // APIは1クエリ最大100件にクランプされるため、cursorで送りながら全件取得する
-        // （旧実装は limit=500 を要求していたが100件で頭打ち＝101件目以降が一覧から漏れていた）
-        const all: WordEntry[] = [];
-        let cursor: string | null = null;
-        for (let page = 0; page < 100; page++) { // 上限100ページ=1万件の安全弁
-          const url = `/api/words?limit=100&sort=newest${cursor ? `&cursor=${cursor}` : ""}`;
-          const res = await fetch(url, { cache: "no-store" });
-          if (!res.ok) throw new Error();
-          const data = await res.json();
-          const batch: WordEntry[] = data.words || [];
-          all.push(...batch);
-          if (batch.length < 100) break;
-          cursor = batch[batch.length - 1].id;
-        }
+        // 全語は /api/words/all がサーバー側で日ごとにキャッシュして返す
+        // （旧実装はここで100件ずつ全件をFirestoreから読み、閲覧のたびに千件以上の読取になっていた）
+        const res = await fetch("/api/words/all", { cache: "no-store" });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const all: WordEntry[] = data.words || [];
         if (!aborted) setAllWords(all);
       } catch {
         if (!aborted) { setAllWords([]); setFetchError(true); }
